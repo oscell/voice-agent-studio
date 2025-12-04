@@ -23,8 +23,15 @@ const App: () => JSX.Element = () => {
 
   const { messages, sendMessage } = useAgent();
   const [caption, setCaption] = useState<string | undefined>("Say Something");
+  const [isStreaming, setIsStreaming] = useState(true);
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
-  const { setupMicrophone, microphone, startMicrophone, microphoneState } =
+  const {
+    setupMicrophone,
+    microphone,
+    startMicrophone,
+    stopMicrophone,
+    microphoneState,
+  } =
     useMicrophone();
   const captionTimeout = useRef<any>();
   const keepAliveInterval = useRef<any>();
@@ -80,21 +87,34 @@ const App: () => JSX.Element = () => {
       }
     };
 
-    if (connectionState === LiveConnectionState.OPEN) {
+    let listenersAttached = false;
+
+    if (connectionState === LiveConnectionState.OPEN && isStreaming) {
       connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
       microphone.addEventListener(MicrophoneEvents.DataAvailable, onData);
-
       startMicrophone();
+      listenersAttached = true;
+    } else if (!isStreaming) {
+      stopMicrophone();
     }
 
     return () => {
-      // prettier-ignore
-      connection.removeListener(LiveTranscriptionEvents.Transcript, onTranscript);
-      microphone.removeEventListener(MicrophoneEvents.DataAvailable, onData);
+      if (listenersAttached) {
+        // prettier-ignore
+        connection.removeListener(LiveTranscriptionEvents.Transcript, onTranscript);
+        microphone.removeEventListener(MicrophoneEvents.DataAvailable, onData);
+        stopMicrophone();
+      }
       clearTimeout(captionTimeout.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectionState]);
+  }, [
+    connectionState,
+    isStreaming,
+    microphone,
+    connection,
+    startMicrophone,
+    stopMicrophone,
+  ]);
 
   useEffect(() => {
     if (!connection) return;
@@ -118,6 +138,10 @@ const App: () => JSX.Element = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [microphoneState, connectionState]);
 
+  const toggleStreaming = () => {
+    setIsStreaming((prev) => !prev);
+  };
+
   console.log("caption", caption);
 
   return (
@@ -127,7 +151,12 @@ const App: () => JSX.Element = () => {
         <div className="flex flex-row h-full w-full overflow-x-hidden">
           <div className="flex flex-col flex-auto h-full">
             {/* height 100% minus 8rem */}
-            <SearchBox sendMessage={sendMessage} caption={caption} />
+            <SearchBox
+              sendMessage={sendMessage}
+              caption={caption}
+              isStreaming={isStreaming}
+              toggleStreaming={toggleStreaming}
+            />
             
             <AgentWidget messages={messages} sendMessage={sendMessage} />
             <div className="relative w-full h-full">
