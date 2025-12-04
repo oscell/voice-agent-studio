@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SearchBox } from "./search/SearchBox";
+
 import {
   LiveConnectionState,
   LiveTranscriptionEvent,
@@ -13,23 +15,28 @@ import {
   useMicrophone,
 } from "../context/MicrophoneContextProvider";
 import Visualizer from "./Visualizer";
-
+import { algoliasearch } from "algoliasearch";
+import { InstantSearch } from "react-instantsearch";
+import { AgentWidget } from "./agent/agent";
+import { useAgent } from "./agent/use-agent";
 const App: () => JSX.Element = () => {
-  const [caption, setCaption] = useState<string | undefined>(
-    "Powered by Deepgram"
-  );
+
+  const { messages, sendMessage } = useAgent();
+  const [caption, setCaption] = useState<string | undefined>("Say Something");
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
   const { setupMicrophone, microphone, startMicrophone, microphoneState } =
     useMicrophone();
   const captionTimeout = useRef<any>();
   const keepAliveInterval = useRef<any>();
 
+  const algoliaSearchClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "", process.env.NEXT_PUBLIC_ALGOLIA_API_KEY ?? "");
+
   useEffect(() => {
     setupMicrophone();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { 
     if (microphoneState === MicrophoneState.Ready) {
       connectToDeepgram({
         model: "nova-3",
@@ -48,7 +55,7 @@ const App: () => JSX.Element = () => {
 
     const onData = (e: BlobEvent) => {
       // iOS SAFARI FIX:
-      // Prevent packetZero from being sent. If sent at size 0, the connection will close. 
+      // Prevent packetZero from being sent. If sent at size 0, the connection will close.
       if (e.data.size > 0) {
         connection?.send(e.data);
       }
@@ -111,12 +118,18 @@ const App: () => JSX.Element = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [microphoneState, connectionState]);
 
+  console.log("caption", caption);
+
   return (
     <>
+    <InstantSearch indexName="nextjs-live-transcription" searchClient={algoliaSearchClient} >
       <div className="flex h-full antialiased">
         <div className="flex flex-row h-full w-full overflow-x-hidden">
           <div className="flex flex-col flex-auto h-full">
             {/* height 100% minus 8rem */}
+            <SearchBox sendMessage={sendMessage} caption={caption} />
+            
+            <AgentWidget messages={messages} sendMessage={sendMessage} />
             <div className="relative w-full h-full">
               {microphone && <Visualizer microphone={microphone} />}
               <div className="absolute bottom-[8rem]  inset-x-0 max-w-4xl mx-auto text-center">
@@ -126,6 +139,7 @@ const App: () => JSX.Element = () => {
           </div>
         </div>
       </div>
+      </InstantSearch>
     </>
   );
 };
