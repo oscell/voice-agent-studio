@@ -1,10 +1,10 @@
 import type { UIMessage } from "@ai-sdk/react";
-import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useState } from "react";
 // exhancge icon
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { getObjectsByIds } from "../../search/getObjectByIDs";
 import { Product } from "@/lib/types/Product";
 
 export type DisplayItemsToolUIPart = {
@@ -31,6 +31,11 @@ export type DisplayItemsOutput = {
   response: Product[];
 };
 
+const truncate = (text: string, maxLength = 50) => {
+  if (!text) return text;
+  return text.length > maxLength ? `${text.slice(0, maxLength).trimEnd()}…` : text;
+};
+
 export function DisplayItemsTool({
   part,
   className,
@@ -40,14 +45,14 @@ export function DisplayItemsTool({
   className?: string;
   sendMessage: (args: { text: string }) => void;
 }) {
-
-  console.log(part);
+  const [showAllMobile, setShowAllMobile] = useState(false);
 
   if (part?.state !== "output-available") {
     return null;
   }
 
   const products = part?.output?.response || [];
+  const hasExtraProducts = products.length > 2;
  
   return (
     <div className={cn("w-full space-y-4", className)}>
@@ -57,9 +62,15 @@ export function DisplayItemsTool({
       {part?.input?.explanation && (
         <p className="text-sm text-muted-foreground">{part.input.explanation}</p>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <Card key={product.objectID} className="overflow-hidden">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {products.map((product, index) => (
+          <Card
+            key={product.objectID}
+            className={cn(
+              "overflow-hidden",
+              hasExtraProducts && !showAllMobile && index >= 2 && "hidden md:block",
+            )}
+          >
             {product.image && (
               <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 <Image
@@ -70,9 +81,9 @@ export function DisplayItemsTool({
                 />
               </div>
             )}
-            <CardHeader>
-              <CardTitle>{product.name}</CardTitle>
-              <CardDescription>{product.desc}</CardDescription>
+            <CardHeader >
+              <CardTitle className="text-sm">{truncate(product.name)}</CardTitle>
+              <CardDescription>{truncate(product.desc)}</CardDescription>
             </CardHeader>
             <CardContent>
 
@@ -80,6 +91,18 @@ export function DisplayItemsTool({
           </Card>
         ))}
       </div>
+      {hasExtraProducts && (
+        <div className="md:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => setShowAllMobile((prev) => !prev)}
+          >
+            {showAllMobile ? "Show fewer items" : "Show all items"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
