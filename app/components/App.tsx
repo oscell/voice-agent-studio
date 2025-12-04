@@ -146,7 +146,6 @@ const App: () => JSX.Element = () => {
       <div className="flex h-full antialiased">
         <div className="flex flex-row h-full w-full overflow-x-hidden">
           <div className="flex flex-col flex-auto h-full">
-            {/* height 100% minus 8rem */}
             <SearchBox
               sendMessage={sendMessage}
               caption={caption}
