@@ -15,8 +15,6 @@ import {
   useMicrophone,
 } from "../context/MicrophoneContextProvider";
 import Visualizer from "./Visualizer";
-import { algoliasearch } from "algoliasearch";
-import { InstantSearch } from "react-instantsearch";
 import { AgentWidget } from "./agent/agent";
 import { useAgent } from "./agent/use-agent";
 const App: () => JSX.Element = () => {
@@ -35,8 +33,6 @@ const App: () => JSX.Element = () => {
     useMicrophone();
   const captionTimeout = useRef<any>();
   const keepAliveInterval = useRef<any>();
-
-  const algoliaSearchClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "", process.env.NEXT_PUBLIC_ALGOLIA_API_KEY ?? "");
 
   useEffect(() => {
     setupMicrophone();
@@ -146,7 +142,7 @@ const App: () => JSX.Element = () => {
 
   return (
     <>
-    <InstantSearch indexName="nextjs-live-transcription" searchClient={algoliaSearchClient} >
+
       <div className="flex h-full antialiased">
         <div className="flex flex-row h-full w-full overflow-x-hidden">
           <div className="flex flex-col flex-auto h-full">
@@ -168,7 +164,6 @@ const App: () => JSX.Element = () => {
           </div>
         </div>
       </div>
-      </InstantSearch>
     </>
   );
 };

@@ -88,11 +88,11 @@ const Home = () => {
             <div className="flex items-center gap-6 text-sm">
               <span className="mt-1">
                 <GitHubButton
-                  href="https://github.com/deepgram-starters/nextjs-live-transcription"
+                  href="https://github.com/oscell/voice-agent-studio"
                   data-color-scheme="no-preference: light; light: light; dark: light;"
                   data-size="large"
                   data-show-count="true"
-                  aria-label="Star deepgram-starters/nextjs-live-transcription on GitHub"
+                  aria-label="Star voice-agent-studio on GitHub"
                 >
                   Star
                 </GitHubButton>
