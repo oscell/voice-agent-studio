@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
+import { Textarea } from "@/components/ui/textarea";
 
 export const SearchBox = ({
   sendMessage,
@@ -15,7 +16,7 @@ export const SearchBox = ({
   toggleStreaming: () => void;
 }) => {
   const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastCaptionRef = useRef("");
 
   const resetInput = () => {
@@ -52,7 +53,8 @@ export const SearchBox = ({
         return prev;
       }
 
-      const needsSpace = prev && !prev.endsWith(" ") && !addition.startsWith(" ");
+      const needsSpace =
+        prev && !prev.endsWith(" ") && !addition.startsWith(" ");
       const nextValue = `${prev}${needsSpace ? " " : ""}${addition}`;
 
       lastCaptionRef.current = trimmedCaption;
@@ -67,8 +69,8 @@ export const SearchBox = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -76,14 +78,15 @@ export const SearchBox = ({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <div className="flex-1 flex items-center gap-2">
-        <Input
+      <div className="flex-1 flex items-start gap-2">
+        <Textarea
           ref={inputRef}
-          type="text"
-          placeholder="Search"
+          placeholder="Ask me anything..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          rows={1}
+          className="min-h-10"
         />
         <Button
           type="button"

@@ -22,7 +22,7 @@ import { useAgent } from "./agent/use-agent";
 const App: () => JSX.Element = () => {
 
   const { messages, sendMessage } = useAgent();
-  const [caption, setCaption] = useState<string | undefined>("Say Something");
+  const [caption, setCaption] = useState<string | undefined>("");
   const [isStreaming, setIsStreaming] = useState(true);
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
   const {
