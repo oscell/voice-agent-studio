@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai';
-import { getObjectsByIds } from '../search/getObjectByIDs';
+import { getObjectsByIds } from '@/lib/getObjectByIDs';
 import { DisplayItemsInput } from './tools/DisplayItemsTool';
 
 
@@ -32,5 +32,5 @@ export const useAgent = () => {
     }
   })
 
-  return { messages, sendMessage }
+  return { messages, sendMessage, addToolOutput }
 }

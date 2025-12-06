@@ -15,3 +15,4 @@ export async function getObjectsByIds(objectIDs: string[]): Promise<Product[]> {
 
   return res.results as Product[];
 }
+

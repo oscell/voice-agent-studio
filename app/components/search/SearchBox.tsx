@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { Textarea } from "@/components/ui/textarea";
+import { useVoiceTranscription } from "../../hooks/useVoiceTranscription";
 
 export const SearchBox = ({
   sendMessage,
@@ -16,65 +17,61 @@ export const SearchBox = ({
   isStreaming: boolean;
   toggleStreaming: () => void;
 }) => {
-  const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastCaptionRef = useRef("");
 
-  const resetInput = () => {
-    setInputValue("");
-    lastCaptionRef.current = "";
-  };
+  const {
+    supported: voiceSupported,
+    listening,
+    error: voiceError,
+    inputValue,
+    setInputValue,
+    startListening,
+    stopListening,
+    applyIncomingText,
+    resetInput,
+  } = useVoiceTranscription();
 
   useEffect(() => {
     if (!caption || caption.trim() === "") {
       return;
     }
 
-    setInputValue((prev) => {
-      const trimmedCaption = caption.trim();
-      const lastCaption = lastCaptionRef.current;
-
-      if (trimmedCaption === lastCaption) {
-        return prev;
-      }
-
-      if (!prev.trim()) {
-        lastCaptionRef.current = trimmedCaption;
-        return trimmedCaption;
-      }
-
-      let addition = trimmedCaption;
-
-      if (lastCaption && trimmedCaption.startsWith(lastCaption)) {
-        addition = trimmedCaption.slice(lastCaption.length).trimStart();
-      }
-
-      if (!addition) {
-        lastCaptionRef.current = trimmedCaption;
-        return prev;
-      }
-
-      const needsSpace =
-        prev && !prev.endsWith(" ") && !addition.startsWith(" ");
-      const nextValue = `${prev}${needsSpace ? " " : ""}${addition}`;
-
-      lastCaptionRef.current = trimmedCaption;
-      return nextValue;
-    });
-  }, [caption]);
-
-  const handleSubmit = () => {
-    if (inputValue.trim()) {
-      sendMessage({ text: inputValue.trim() });
-      resetInput();
-    }
-  };
+    applyIncomingText(caption, lastCaptionRef);
+  }, [caption, applyIncomingText]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      if (inputValue.trim()) {
+        sendMessage({ text: inputValue.trim() });
+        resetInput();
+        lastCaptionRef.current = "";
+      }
     }
+  };
+
+  const handleClear = () => {
+    resetInput();
+    lastCaptionRef.current = "";
+    inputRef.current?.focus();
+  };
+
+  const micDisabled = !voiceSupported || !!voiceError;
+
+  const handleMicPointerDown = () => {
+    if (micDisabled) return;
+    startListening();
+  };
+
+  const handleMicPointerUp = () => {
+    if (micDisabled) return;
+    stopListening();
+  };
+
+  const handleMicClick = () => {
+    // TODO: remove Deepgram toggle once SpeechRecognition replaces streaming.
+    toggleStreaming();
   };
 
   return (
@@ -92,10 +89,7 @@ export const SearchBox = ({
         <Button
           type="button"
           variant="secondary"
-          onClick={() => {
-            resetInput();
-            inputRef.current?.focus();
-          }}
+          onClick={handleClear}
           disabled={!inputValue}
           aria-label="Clear search input"
         >
@@ -103,13 +97,28 @@ export const SearchBox = ({
         </Button>
         <Button
           type="button"
-          variant={isStreaming ? "destructive" : "default"}
-          onClick={toggleStreaming}
-          aria-pressed={isStreaming}
+          variant={listening || isStreaming ? "destructive" : "default"}
+          onPointerDown={handleMicPointerDown}
+          onPointerUp={handleMicPointerUp}
+          onPointerLeave={handleMicPointerUp}
+          onClick={handleMicClick}
+          disabled={micDisabled}
+          aria-pressed={listening || isStreaming}
+          aria-label="Press and hold to talk"
         >
-          <MicrophoneIcon micOpen={isStreaming} />
+          <MicrophoneIcon micOpen={listening || isStreaming} />
         </Button>
       </div>
+      {voiceError && (
+        <p className="text-sm text-destructive">
+          {voiceError} (browser SpeechRecognition)
+        </p>
+      )}
+      {!voiceSupported && !voiceError && (
+        <p className="text-sm text-muted-foreground">
+          SpeechRecognition unavailable; Deepgram stream remains enabled.
+        </p>
+      )}
     </div>
   );
 };

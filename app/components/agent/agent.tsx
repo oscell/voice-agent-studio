@@ -75,6 +75,7 @@ export const AgentWidget = ({
     }
     return -1;
   })();
+  
   const visibleMessages = lastUserIndex === -1 ? messages : messages.slice(lastUserIndex);
 
   return (

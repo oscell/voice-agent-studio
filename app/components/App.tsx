@@ -68,9 +68,7 @@ const App: () => JSX.Element = () => {
       const { is_final: isFinal, speech_final: speechFinal } = data;
       let thisCaption = data.channel.alternatives[0].transcript;
 
-      console.log("thisCaption", thisCaption);
       if (thisCaption !== "") {
-        console.log('thisCaption !== ""', thisCaption);
         setCaption(thisCaption);
       }
 
@@ -137,8 +135,6 @@ const App: () => JSX.Element = () => {
   const toggleStreaming = () => {
     setIsStreaming((prev) => !prev);
   };
-
-  console.log("caption", caption);
 
   return (
     <>
