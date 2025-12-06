@@ -2,12 +2,12 @@ import { Inter } from "next/font/google";
 import classNames from "classnames";
 import localFont from "next/font/local";
 
-import { DeepgramContextProvider } from "./context/DeepgramContextProvider";
-import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
+
 
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
+import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const favorit = localFont({
@@ -46,7 +46,7 @@ export default function RootLayout({
         )}`}
       >
         <MicrophoneContextProvider>
-          <DeepgramContextProvider>{children}</DeepgramContextProvider>
+          {children}
         </MicrophoneContextProvider>
       </body>
     </html>
