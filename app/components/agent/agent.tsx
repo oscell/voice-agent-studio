@@ -15,11 +15,9 @@ import {
 } from "@/components/ui/collapsible";
 import config from "@/lib/constants";
 
-type MessageProps = {
+type AgentMessageProps = 
+  {
   message: UIMessage;
-};
-
-type AgentMessageProps = MessageProps & {
   sendMessage: (args: { text: string }) => void;
 };
 
@@ -35,10 +33,6 @@ const truncateText = (text: string, maxLength = 100) => {
     : text;
 };
 
-const getUserMessageText = (message: UIMessage): string => {
-  const textPart = message.parts.find((part) => part.type === "text");
-  return textPart?.type === "text" ? textPart.text : "";
-};
 
 const hasDisplayableContent = (message: UIMessage) => {
   return message.parts.some(
