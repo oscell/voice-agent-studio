@@ -98,9 +98,10 @@ const AgentStudioLogo = () => (
 const Home = () => {
   return (
     <>
-      <div className="h-full overflow-hidden">
-        {/* height 4rem */}
-        <div className="bg-gradient-to-b from-black/50 to-black/10 backdrop-blur-[2px] h-[4rem] flex items-center">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="h-[calc(100vh-4rem)] overflow-hidden max-w-md mx-auto border-2 border-primary bg-primary/20 rounded-3xl">
+          {/* height 4rem */}
+        <div className="bg-black/90 flex items-center p-4">
           <header className="mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <AlgoliaLogo />
@@ -120,23 +121,15 @@ const Home = () => {
                 </GitHubButton>
 
 
-              <span className="gradient-shadow bg-gradient-to-r to-[#13EF93]/50 from-[#149AFB]/80 rounded">
-                <a
-                  href="https://console.deepgram.com/signup?jump=keys"
-                  target="_blank"
-                  className="hidden text-xs md:inline-block bg-black text-white rounded m-px px-8 py-2 font-semibold"
-                >
-                  Get an API Key
-                </a>
-              </span>
             </div>
           </header>
         </div>
 
         {/* height 100% minus 8rem */}
-        <main className="mx-auto px-4 md:px-6 lg:px-8 h-[calc(100%-4rem)] -mb-[4rem]">
+        <main className="mx-auto py-4 px-2 h-[calc(100%-4rem)] -mb-[4rem]">
           <App />
         </main>
+        </div>
       </div>
     </>
   );
