@@ -14,6 +14,7 @@ import { DefaultChatTransport } from "ai";
 import { getObjectsByIds } from "@/lib/getObjectByIDs";
 import config from "@/lib/constants";
 import { DisplayItemsInput } from "../components/agent/tools/DisplayItemsTool";
+import { SummaryWithSourcesInput } from "../components/agent/tools/SummaryWithSourcesTool";
 import { Article } from "@/lib/types/Product";
 
 export type UseAgentChatResult = {
@@ -80,6 +81,26 @@ export const useAgentChat = (): UseAgentChatResult => {
             response: products,
           },
         });
+      } else if (
+        toolCall.toolCall.toolName === "summary-with-sources"
+      ) {
+        console.log("summary-with-sources", toolCall.toolCall);
+        const input = toolCall.toolCall.input as SummaryWithSourcesInput;
+        const indexName = config.verticals.articles.indexName;
+        
+        const allObjectIds = input.items?.flatMap((item) => item.objectIds) || [];
+        const uniqueObjectIds = Array.from(new Set(allObjectIds));
+
+        const articles = await getObjectsByIds<Article>(uniqueObjectIds, indexName);
+
+        addToolOutput({
+          tool: toolCall.toolCall.toolName,
+          toolCallId: toolCall.toolCall.toolCallId,
+          state: "output-available",
+          output: {
+            response: articles,
+          },
+        });
       }
     },
   });
@@ -88,6 +109,7 @@ export const useAgentChat = (): UseAgentChatResult => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const [supported, setSupported] = useState(false);
+  const [supportChecked, setSupportChecked] = useState(false);
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -102,6 +124,7 @@ export const useAgentChat = (): UseAgentChatResult => {
     if (!SpeechRecognitionCtor) {
       setSupported(false);
       setError("SpeechRecognition API unavailable in this browser.");
+      setSupportChecked(true);
       return;
     }
 
@@ -139,6 +162,7 @@ export const useAgentChat = (): UseAgentChatResult => {
 
     recognitionRef.current = recognition;
     setSupported(true);
+    setSupportChecked(true);
 
     return () => {
       recognitionRef.current?.stop();
@@ -218,11 +242,11 @@ export const useAgentChat = (): UseAgentChatResult => {
 
   const errorMessage = error ? `${error} (browser SpeechRecognition)` : undefined;
   const warningMessage = useMemo(() => {
-    if (!supported && !error) {
-      return "Voice input not supported in this browser.";
+    if (!supportChecked || supported || error) {
+      return undefined;
     }
-    return undefined;
-  }, [supported, error]);
+    return "Voice input not supported in this browser.";
+  }, [supportChecked, supported, error]);
 
   return {
     messages,

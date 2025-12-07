@@ -5,6 +5,10 @@ import {
   DisplayItemsTool,
   DisplayItemsToolUIPart,
 } from "./tools/DisplayItemsTool";
+import {
+  SummaryWithSourcesTool,
+  SummaryWithSourcesToolUIPart,
+} from "./tools/SummaryWithSourcesTool";
 import { UIMessage } from "@ai-sdk/react";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { ChevronDown, ChevronUp, History } from "lucide-react";
@@ -35,11 +39,15 @@ const truncateText = (text: string, maxLength = 100) => {
     : text;
 };
 
+const isSummaryWithSourcesPart = (part: UIMessage["parts"][number]) =>
+  part.type === "tool-summary-with-sources";
+
 const hasDisplayableContent = (message: UIMessage) => {
   return message.parts.some(
     (part) =>
       (part.type === "text" && part.text.trim().length > 0) ||
-      part.type === "tool-display-items"
+      part.type === "tool-display-items" ||
+      isSummaryWithSourcesPart(part)
   );
 };
 
@@ -93,9 +101,10 @@ const UserMessageTrigger = ({
 
 const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
   const textParts = message.parts.filter((part) => part.type === "text");
-  const toolParts = message.parts.filter(
+  const displayItemsParts = message.parts.filter(
     (part) => part.type === "tool-display-items"
   ) as DisplayItemsToolUIPart[];
+  const summaryWithSourcesParts = message.parts.filter(isSummaryWithSourcesPart) as SummaryWithSourcesToolUIPart[];
 
   return (
     <article className="flex flex-col gap-6 relative">
@@ -115,13 +124,24 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
         </div>
       )}
 
-      {toolParts.length > 0 && (
+      {displayItemsParts.length > 0 && (
         <div className="w-full pl-6">
-          {toolParts.map((part, index) => (
+          {displayItemsParts.map((part, index) => (
             <DisplayItemsTool
               key={`${message.id}-tool-${index}`}
               part={part}
               sendMessage={sendMessage}
+            />
+          ))}
+        </div>
+      )}
+
+      {summaryWithSourcesParts.length > 0 && (
+        <div className="w-full pl-6">
+          {summaryWithSourcesParts.map((part, index) => (
+            <SummaryWithSourcesTool
+              key={`${message.id}-summary-${index}`}
+              part={part}
             />
           ))}
         </div>

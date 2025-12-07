@@ -66,7 +66,7 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-function ArticleCard({ article }: { article: Article }) {
+export function ArticleCard({ article }: { article: Article }) {
   const formatDate = (year: number, month: number, day: number) => {
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
