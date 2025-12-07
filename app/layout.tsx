@@ -8,6 +8,7 @@ import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
+import { ThemeProvider } from "./components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 const favorit = localFont({
@@ -38,16 +39,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-dvh">
+    <html lang="en" className="h-dvh" suppressHydrationWarning>
       <body
-        className={`h-full dark ${classNames(
+        className={`h-full ${classNames(
           favorit.variable,
           inter.className
         )}`}
       >
-        <MicrophoneContextProvider>
-          {children}
-        </MicrophoneContextProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+          <MicrophoneContextProvider>
+            {children}
+          </MicrophoneContextProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

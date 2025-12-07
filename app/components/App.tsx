@@ -6,7 +6,7 @@ import Visualizer from "./Visualizer";
 import { useSearchbox } from "../hooks/useSearchbox";
 
 const App: () => JSX.Element = () => {
-  const { messages, sendMessage } = useAgent();
+  const { messages, sendMessage, status } = useAgent();
   const { listening, handleMicToggle, micDisabled, micPressed, ...searchboxProps } = useSearchbox({ sendMessage });
 
   return (
@@ -26,6 +26,7 @@ const App: () => JSX.Element = () => {
               handleMicToggle={handleMicToggle}
               micDisabled={micDisabled}
               micPressed={micPressed}
+              status={status}
             />
           </div>
         </div>

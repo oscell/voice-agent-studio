@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 import {
   MicrophoneState,
   useMicrophone,
@@ -31,6 +32,12 @@ const Visualizer = (): JSX.Element | null => {
 
   const { microphone, setupMicrophone, startMicrophone, microphoneState } =
     useMicrophone();
+  const { resolvedTheme } = useTheme();
+  const themeRef = useRef(resolvedTheme);
+
+  useEffect(() => {
+    themeRef.current = resolvedTheme;
+  }, [resolvedTheme]);
 
   // Request microphone access once.
   useEffect(() => {
@@ -117,7 +124,7 @@ const Visualizer = (): JSX.Element | null => {
       const centerY = height / 2;
 
       // Clear with a subtle fade effect for trail
-      context.fillStyle = "rgba(0, 0, 0, 0.15)";
+      context.fillStyle = themeRef.current === "dark" ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)";
       context.fillRect(0, 0, width, height);
 
       analyser.getByteFrequencyData(dataArray);

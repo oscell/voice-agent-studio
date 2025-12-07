@@ -8,7 +8,7 @@ import { Article, Product } from '@/lib/types/Product';
 
 
 export const useAgent = () => {
-  const { messages, sendMessage, addToolOutput } = useChat({
+  const { messages, sendMessage, addToolOutput,status } = useChat({
     transport: new DefaultChatTransport({
       api: `https://${process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!}.algolia.net/agent-studio/1/agents/${process.env.NEXT_PUBLIC_ALGOLIA_AGENT_ID!}/completions?stream=true&compatibilityMode=ai-sdk-5`,
       headers: {
@@ -37,5 +37,5 @@ export const useAgent = () => {
     }
   })
 
-  return { messages, sendMessage, addToolOutput }
+  return { messages, sendMessage, addToolOutput, status }
 }

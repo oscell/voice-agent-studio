@@ -1,22 +1,27 @@
 "use client";
 
 import App from "./components/App";
-import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "./components/theme-toggle";
 
-const GithubLogo = ({ className, onClick }: { className?: string, onClick?: () => void }) => (
-  <svg 
-    role="img" 
-    viewBox="0 0 24 24" 
+const GithubLogo = ({
+  className,
+  onClick,
+}: {
+  className?: string;
+  onClick?: () => void;
+}) => (
+  <svg
+    role="img"
+    viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     onClick={onClick}
     fill="currentColor"
   >
     <title>GitHub</title>
-    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
   </svg>
 );
-
 
 const BrandLogo = () => (
   <svg
@@ -27,7 +32,14 @@ const BrandLogo = () => (
     role="img"
   >
     <defs>
-      <linearGradient id="brand-gradient" x1="0" y1="0" x2="3200" y2="0" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="brand-gradient"
+        x1="0"
+        y1="0"
+        x2="3200"
+        y2="0"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop offset="0%" stopColor="#003dff" />
         <stop offset="60%" stopColor="#00C2FF" />
         <stop offset="100%" stopColor="#00E0FF" />
@@ -71,15 +83,16 @@ const BrandLogo = () => (
         fillRule="evenodd"
         d="M1314.05,104.73h-49.33c-48.36,0-90.91,25.48-115.75,64.1-11.79,18.34-19.6,39.64-22.11,62.59-.58,5.3-.88,10.68-.88,16.14s.31,11.15,.93,16.59c4.28,38.09,23.14,71.61,50.66,94.52,2.93,2.6,6.05,4.98,9.31,7.14,12.86,8.49,28.11,13.47,44.52,13.47h0c17.99,0,34.61-5.93,48.16-15.97,16.29-11.58,28.88-28.54,34.48-47.75v50.26h-.11v11.08c0,21.84-5.71,38.27-17.34,49.36-11.61,11.08-31.04,16.63-58.25,16.63-11.12,0-28.79-.59-46.6-2.41-2.83-.29-5.46,1.5-6.27,4.22l-12.78,43.11c-1.02,3.46,1.27,7.02,4.83,7.53,21.52,3.08,42.52,4.68,54.65,4.68,48.91,0,85.16-10.75,108.89-32.21,21.48-19.41,33.15-48.89,35.2-88.52V110.63c0-3.26-2.64-5.9-5.9-5.9h-56.32Zm0,64.1s.65,139.13,0,143.36c-12.08,9.77-27.11,13.59-43.49,14.7-.16,.01-.33,.03-.49,.04-1.12,.07-2.24,.1-3.36,.1-1.32,0-2.63-.03-3.94-.1-40.41-2.11-74.52-37.26-74.52-79.38,0-10.25,1.96-20.01,5.42-28.98,11.22-29.12,38.77-49.74,71.06-49.74h49.33Z"
       />
-      <path
-        d="M249.83,0C113.3,0,2,110.09,.03,246.16c-2,138.19,110.12,252.7,248.33,253.5,42.68,.25,83.79-10.19,120.3-30.03,3.56-1.93,4.11-6.83,1.08-9.51l-23.38-20.72c-4.75-4.21-11.51-5.4-17.36-2.92-25.48,10.84-53.17,16.38-81.71,16.03-111.68-1.37-201.91-94.29-200.13-205.96,1.76-110.26,92-199.41,202.67-199.41h202.69V407.41l-115-102.18c-3.72-3.31-9.42-2.66-12.42,1.31-18.46,24.44-48.53,39.64-81.93,37.34-46.33-3.2-83.87-40.5-87.34-86.81-4.15-55.24,39.63-101.52,94-101.52,49.18,0,89.68,37.85,93.91,85.95,.38,4.28,2.31,8.27,5.52,11.12l29.95,26.55c3.4,3.01,8.79,1.17,9.63-3.3,2.16-11.55,2.92-23.58,2.07-35.92-4.82-70.34-61.8-126.93-132.17-131.26-80.68-4.97-148.13,58.14-150.27,137.25-2.09,77.1,61.08,143.56,138.19,145.26,32.19,.71,62.03-9.41,86.14-26.95l150.26,133.2c6.44,5.71,16.61,1.14,16.61-7.47V9.48C499.66,4.25,495.42,0,490.18,0H249.83Z"
-      />
+      <path d="M249.83,0C113.3,0,2,110.09,.03,246.16c-2,138.19,110.12,252.7,248.33,253.5,42.68,.25,83.79-10.19,120.3-30.03,3.56-1.93,4.11-6.83,1.08-9.51l-23.38-20.72c-4.75-4.21-11.51-5.4-17.36-2.92-25.48,10.84-53.17,16.38-81.71,16.03-111.68-1.37-201.91-94.29-200.13-205.96,1.76-110.26,92-199.41,202.67-199.41h202.69V407.41l-115-102.18c-3.72-3.31-9.42-2.66-12.42,1.31-18.46,24.44-48.53,39.64-81.93,37.34-46.33-3.2-83.87-40.5-87.34-86.81-4.15-55.24,39.63-101.52,94-101.52,49.18,0,89.68,37.85,93.91,85.95,.38,4.28,2.31,8.27,5.52,11.12l29.95,26.55c3.4,3.01,8.79,1.17,9.63-3.3,2.16-11.55,2.92-23.58,2.07-35.92-4.82-70.34-61.8-126.93-132.17-131.26-80.68-4.97-148.13,58.14-150.27,137.25-2.09,77.1,61.08,143.56,138.19,145.26,32.19,.71,62.03-9.41,86.14-26.95l150.26,133.2c6.44,5.71,16.61,1.14,16.61-7.47V9.48C499.66,4.25,495.42,0,490.18,0H249.83Z" />
       {/* Agent Studio Text - Transformed to sit next to Algolia logo */}
       <g transform="translate(2320, 0) scale(5.88)">
         <text
           x="0"
           y="40"
-          style={{ fontFamily: "var(--font-favorit), sans-serif", fontWeight: 100 }}
+          style={{
+            fontFamily: "var(--font-favorit), sans-serif",
+            fontWeight: 100,
+          }}
           fontSize="48"
           letterSpacing="-0.04em"
         >
@@ -100,37 +113,43 @@ const BrandLogo = () => (
   </svg>
 );
 
-
-
 const Home = () => {
   return (
     <>
+      <div className="fixed top-4 right-4 z-50 ">
+        <ThemeToggle />
+      </div>
       <div className="flex items-center justify-center min-h-screen">
-        <div className="h-[calc(100vh-4rem)] overflow-hidden max-w-md mx-auto border-2 border-primary bg-primary/20 rounded-3xl">
+        <div className="h-[calc(100vh-4rem)] overflow-hidden max-w-md mx-auto border-2 rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
           {/* height 4rem */}
-        <div className="bg-black/90 flex items-center pt-4">
-          <header className="mx-auto w-full px-4 flex items-center justify-between">
-            <a 
-              href="https://www.algolia.com/doc/guides/algolia-ai/agent-studio" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="cursor-pointer"
-            >
-              <BrandLogo />
-            </a>
-            <div className="flex items-center gap-6 text-sm">
-              <GithubLogo
-                className="w-5 h-5 cursor-pointer hover:text-white/80 transition-colors"
-                onClick={() => window.open("https://github.com/oscell/voice-agent-studio", "_blank")}
-              />
-            </div>
-          </header>
-        </div>
+          <div className="bg-white/90 dark:bg-black/90 flex items-center pt-4">
+            <header className="mx-auto w-full px-4 flex items-center justify-between py-2">
+              <a
+                href="https://www.algolia.com/doc/guides/algolia-ai/agent-studio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer"
+              >
+                <BrandLogo />
+              </a>
+              <div className="flex items-center gap-6 text-sm">
+                <GithubLogo
+                  className="w-5 h-5 cursor-pointer hover:text-black/80 dark:hover:text-white/80 transition-colors"
+                  onClick={() =>
+                    window.open(
+                      "https://github.com/oscell/voice-agent-studio",
+                      "_blank"
+                    )
+                  }
+                />
+              </div>
+            </header>
+          </div>
 
-        {/* height 100% minus 8rem */}
-        <main className="mx-auto h-[calc(100%-4rem)] -mb-[4rem]">
-          <App />
-        </main>
+          {/* height 100% minus 8rem */}
+          <main className="mx-auto h-[calc(100%-4rem)] -mb-[4rem]">
+            <App />
+          </main>
         </div>
       </div>
     </>

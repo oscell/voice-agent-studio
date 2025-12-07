@@ -158,12 +158,14 @@ export const AgentWidget = ({
   handleMicToggle,
   micDisabled,
   micPressed,
+  status,
 }: {
   messages: UIMessage[];
   sendMessage: (args: { text: string }) => void;
   handleMicToggle: () => void;
   micDisabled: boolean;
   micPressed: boolean;
+  status: "submitted" | "streaming" | "ready" | "error";
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [showHistory, setShowHistory] = useState(false);
@@ -285,6 +287,13 @@ export const AgentWidget = ({
               sendMessage={sendMessage}
             />
           ))}
+          {status === "submitted" && (
+            <div className="flex items-center gap-2 text-muted-foreground animate-pulse pl-6">
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
+            </div>
+          )}
         </div>
       )}
       <div ref={bottomRef} />
