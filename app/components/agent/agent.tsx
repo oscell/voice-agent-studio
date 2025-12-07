@@ -13,6 +13,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import config from "@/lib/constants";
 
 type MessageProps = {
   message: UIMessage;
@@ -211,7 +212,22 @@ export const AgentWidget = ({
         >
           <MicrophoneIcon micOpen={micPressed} className="h-10 w-10" />
         </button>
-        <p className="text-lg">Press the microphone to start a conversation</p>
+        <p className="text-lg mb-6">Press the microphone to start a conversation</p>
+        
+        {config.verticals.articles.quickPrompts.length > 0 && (
+          <div className="flex flex-col gap-2 w-full max-w-xs">
+            <p className="text-xs text-muted-foreground/70 mb-1">Or try one of these:</p>
+            {config.verticals.articles.quickPrompts.map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => sendMessage({ text: prompt.message })}
+                className="px-4 py-2 text-sm rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-left"
+              >
+                {prompt.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

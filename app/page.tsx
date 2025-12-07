@@ -108,7 +108,7 @@ const Home = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="h-[calc(100vh-4rem)] overflow-hidden max-w-md mx-auto border-2 border-primary bg-primary/20 rounded-3xl">
           {/* height 4rem */}
-        <div className="bg-black/90 flex items-center p-4">
+        <div className="bg-black/90 flex items-center pt-4">
           <header className="mx-auto w-full px-4 flex items-center justify-between">
             <a 
               href="https://www.algolia.com/doc/guides/algolia-ai/agent-studio" 

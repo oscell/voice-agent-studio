@@ -9,6 +9,20 @@ const config = {
         },
         articles: {
             indexName: "news_paper_generic_v2",
+            quickPrompts: [
+                {
+                    label: "influential celebrities",
+                    message: "influential celebrities",
+                },
+                {
+                    label: "What are the latest fashion trends?",
+                    message: "What are the latest fashion trends?",
+                },
+                {
+                    label: "current state of the retail industry",
+                    message: "current state of the retail industry",
+                },
+            ]
         }
     }
 }
