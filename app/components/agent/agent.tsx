@@ -33,7 +33,7 @@ const truncateText = (text: string, maxLength = 100) => {
   return text.length > maxLength
     ? `${text.slice(0, maxLength).trimEnd()}…`
     : text;
-};  
+};
 
 const hasDisplayableContent = (message: UIMessage) => {
   return message.parts.some(

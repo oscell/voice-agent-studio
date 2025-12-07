@@ -3,16 +3,29 @@
 import { Button } from "@/components/ui/button";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { Textarea } from "@/components/ui/textarea";
-import type { UseSearchboxResult } from "../../hooks/useSearchbox";
+import type { UseAgentChatResult } from "../../hooks/useAgentChat";
+
+type SearchBoxProps = {
+  showMic?: boolean;
+} & Pick<
+  UseAgentChatResult,
+  | "inputValue"
+  | "setInputValue"
+  | "inputRef"
+  | "handleKeyDown"
+  | "handleClear"
+  | "handleMicToggle"
+  | "micDisabled"
+  | "micVariant"
+  | "micPressed"
+  | "errorMessage"
+  | "warningMessage"
+>;
 
 export const SearchBox = ({
-  sendMessage,
   showMic = true,
   ...searchboxProps
-}: {
-  sendMessage: (args: { text: string }) => void;
-  showMic?: boolean;
-} & Omit<UseSearchboxResult, "listening">) => {
+}: SearchBoxProps) => {
   const {
     inputValue,
     setInputValue,
