@@ -17,8 +17,10 @@ const truncateText = (text: string, maxLength = 100) => {
 };
 
 const UserMessage = ({ message }: MessageProps) => (
-  <article className="flex justify-end mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-    <div className="max-w-[85%]">
+  <article className="flex justify-end animate-in fade-in slide-in-from-bottom-2 duration-300 relative">
+    <div className="absolute right-0 top-0 bottom-0 w-1 bg-green-500 rounded-full" />
+    <div className="absolute inset-0 bg-gradient-to-l from-green-500/10 to-transparent pointer-events-none -z-10" />
+    <div className="max-w-[85%] pr-6 py-2">
       {message.parts.map((part, index) =>
         part.type === "text" ? (
           <h2
@@ -40,9 +42,12 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
   ) as DisplayItemsToolUIPart[];
 
   return (
-    <article className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+    <article className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150 relative">
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-full" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent pointer-events-none -z-10" />
+      
       {textParts.length > 0 && (
-        <div className="space-y-4 max-w-[90%]">
+        <div className="space-y-4 max-w-[90%] pl-6 py-2">
           {textParts.map((part, index) => (
             <p key={`${message.id}-text-${index}`} className="text-lg md:text-xl leading-relaxed text-muted-foreground">
               {part.type === "text" ? part.text : null}
@@ -52,7 +57,7 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
       )}
       
       {toolParts.length > 0 && (
-        <div className="w-full pl-0 md:pl-4 border-l-2 border-primary/10">
+        <div className="w-full pl-6">
           {toolParts.map((part, index) => (
             <DisplayItemsTool
               key={`${message.id}-tool-${index}`}
@@ -94,7 +99,7 @@ export const AgentWidget = ({
   }
 
   return (
-    <section className="flex flex-col gap-8 pb-8">
+    <section className="flex flex-col">
       {visibleMessages.map((message) =>
         message.role === "user" ? (
           <UserMessage key={message.id} message={message} />

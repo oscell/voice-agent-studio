@@ -17,7 +17,7 @@ const App: () => JSX.Element = () => {
         </div>
       )}
       <div className="relative z-10 flex flex-col h-full w-full overflow-hidden">
-        <div className="flex flex-col flex-auto h-full max-w-3xl mx-auto w-full p-4 md:p-6 lg:p-8 gap-6 md:gap-8">
+        <div className="flex flex-col flex-auto h-full max-w-3xl mx-auto w-full p-4 gap-6">
           <SearchBox sendMessage={sendMessage} {...searchboxProps} />
           <div className="flex-1 overflow-y-auto min-h-0 pr-2 scrollbar-hide">
             <AgentWidget messages={messages} sendMessage={sendMessage} />
