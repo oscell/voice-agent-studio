@@ -47,11 +47,6 @@ export const useSearchbox = (
     const [error, setError] = useState<string | undefined>(undefined);
     const [inputValue, setInputValue] = useState("");
 
-    console.log("listening", listening);
-    console.log("supported", supported);
-    console.log("error", error);  console.log("inputValue", inputValue);
-    console.log("transcript", transcript);
-    console.log("lastVoiceTranscriptRef", lastVoiceTranscriptRef.current);
     // Initialize SpeechRecognition
     useEffect(() => {
         const SpeechRecognitionCtor =
@@ -140,13 +135,16 @@ export const useSearchbox = (
     }, [listening]);
 
     useEffect(() => {
-        // Only append the captured transcript once the user stops talking
+        // When voice input finishes, automatically send the composed text to the agent
         if (!listening && transcript) {
-            setInputValue((prev) =>
-                prev.trim() ? `${prev.trim()} ${transcript}` : transcript
-            );
+            const finalText = inputValue.trim()
+                ? `${inputValue.trim()} ${transcript}`
+                : transcript;
+
+            sendMessage({ text: finalText });
+            resetInput();
         }
-    }, [listening, transcript]);
+    }, [listening, transcript, inputValue, sendMessage, resetInput]);
 
     // Event handlers
     const handleKeyDown = useCallback(

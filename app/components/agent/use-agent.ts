@@ -3,6 +3,8 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai';
 import { getObjectsByIds } from '@/lib/getObjectByIDs';
 import { DisplayItemsInput } from './tools/DisplayItemsTool';
+import config from '@/lib/constants';
+import { Article, Product } from '@/lib/types/Product';
 
 
 export const useAgent = () => {
@@ -17,7 +19,10 @@ export const useAgent = () => {
     onToolCall: async (toolCall) => {
       console.log(toolCall);
       if (toolCall.toolCall.toolName === "display-items") {
-        const products = await getObjectsByIds((toolCall.toolCall.input as DisplayItemsInput).objectIDs)
+        const input = toolCall.toolCall.input as DisplayItemsInput;
+        // Default to products index, but can be extended to support different indices
+        const indexName = config.verticals.articles.indexName;
+        const products = await getObjectsByIds<Article>(input.objectIDs, indexName);
 
         console.log("products", products);
         addToolOutput({
