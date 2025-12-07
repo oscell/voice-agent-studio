@@ -40,6 +40,14 @@ const getUserMessageText = (message: UIMessage): string => {
   return textPart?.type === "text" ? textPart.text : "";
 };
 
+const hasDisplayableContent = (message: UIMessage) => {
+  return message.parts.some(
+    (part) =>
+      (part.type === "text" && part.text.trim().length > 0) ||
+      part.type === "tool-display-items"
+  );
+};
+
 const UserMessageTrigger = ({
   message,
   isOpen,
@@ -56,8 +64,12 @@ const UserMessageTrigger = ({
             <div className="absolute inset-0 bg-gradient-to-l from-green-500/10 to-transparent pointer-events-none -z-10 group-hover:from-green-500/20 transition-colors" />
           </>
         )}
-        <div className={`pr-6 flex items-start gap-2 ${isOpen ? "max-w-[100%]" : "max-w-full"}`}>
-          <span className={`mt-1 transition-colors ${isOpen ? "text-muted-foreground group-hover:text-foreground" : "text-green-500"}`}>
+        <div
+          className={`pr-6 flex items-start gap-2 ${isOpen ? "max-w-[100%]" : "max-w-full"}`}
+        >
+          <span
+            className={`mt-1 transition-colors ${isOpen ? "text-muted-foreground group-hover:text-foreground" : "text-green-500"}`}
+          >
             {isOpen ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
@@ -214,11 +226,15 @@ export const AgentWidget = ({
         >
           <MicrophoneIcon micOpen={micPressed} className="h-10 w-10" />
         </button>
-        <p className="text-lg mb-6">Press the microphone to start a conversation</p>
-        
+        <p className="text-lg mb-6">
+          Press the microphone to start a conversation
+        </p>
+
         {config.verticals.articles.quickPrompts.length > 0 && (
           <div className="flex flex-col gap-2 w-full max-w-xs">
-            <p className="text-xs text-muted-foreground/70 mb-1">Or try one of these:</p>
+            <p className="text-xs text-muted-foreground/70 mb-1">
+              Or try one of these:
+            </p>
             {config.verticals.articles.quickPrompts.map((prompt, index) => (
               <button
                 key={index}
@@ -237,6 +253,16 @@ export const AgentWidget = ({
   const lastTurnIndex = conversationTurns.length - 1;
   const hasHistory = conversationTurns.length > 1;
 
+  const showLoading =
+    status === "submitted" ||
+    (status === "streaming" &&
+      (!conversationTurns[lastTurnIndex]?.agentMessages.length ||
+        !hasDisplayableContent(
+          conversationTurns[lastTurnIndex].agentMessages[
+            conversationTurns[lastTurnIndex].agentMessages.length - 1
+          ]
+        )));
+
   return (
     <section className="flex flex-col gap-4">
       {/* History toggle button */}
@@ -246,20 +272,24 @@ export const AgentWidget = ({
           className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-1 px-2 rounded-lg hover:bg-muted/50 self-start"
         >
           <History className="h-3 w-3" />
-          {showHistory ? "Hide history" : `Show history (${conversationTurns.length - 1})`}
+          {showHistory
+            ? "Hide history"
+            : `Show history (${conversationTurns.length - 1})`}
         </button>
       )}
 
       {/* Previous conversation turns (collapsed by default) */}
       {showHistory &&
-        conversationTurns.slice(0, -1).map((turn) => (
-          <ConversationTurnItem
-            key={turn.userMessage.id}
-            turn={turn}
-            sendMessage={sendMessage}
-            defaultOpen={false}
-          />
-        ))}
+        conversationTurns
+          .slice(0, -1)
+          .map((turn) => (
+            <ConversationTurnItem
+              key={turn.userMessage.id}
+              turn={turn}
+              sendMessage={sendMessage}
+              defaultOpen={false}
+            />
+          ))}
 
       {/* Current/latest conversation turn (always visible, not collapsible) */}
       {conversationTurns.length > 0 && (
@@ -268,15 +298,16 @@ export const AgentWidget = ({
             <div className="absolute right-0 top-0 bottom-0 w-1 bg-green-500 rounded-full" />
             <div className="absolute inset-0 bg-gradient-to-l from-green-500/10 to-transparent pointer-events-none -z-10" />
             <div className="max-w-[85%] pr-6 py-2">
-              {conversationTurns[lastTurnIndex].userMessage.parts.map((part, index) =>
-                part.type === "text" ? (
-                  <h2
-                    key={`${conversationTurns[lastTurnIndex].userMessage.id}-text-${index}`}
-                    className="text-2xl md:text-3xl font-medium tracking-tight text-right leading-tight text-foreground/90"
-                  >
-                    {truncateText(part.text, 100)}
-                  </h2>
-                ) : null
+              {conversationTurns[lastTurnIndex].userMessage.parts.map(
+                (part, index) =>
+                  part.type === "text" ? (
+                    <h2
+                      key={`${conversationTurns[lastTurnIndex].userMessage.id}-text-${index}`}
+                      className="text-2xl md:text-3xl font-medium tracking-tight text-right leading-tight text-foreground/90"
+                    >
+                      {truncateText(part.text, 100)}
+                    </h2>
+                  ) : null
               )}
             </div>
           </article>
@@ -287,7 +318,7 @@ export const AgentWidget = ({
               sendMessage={sendMessage}
             />
           ))}
-          {status === "submitted" && (
+          {showLoading && (
             <div className="flex items-center gap-2 text-muted-foreground animate-pulse pl-6">
               <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
               <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />

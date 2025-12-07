@@ -16,6 +16,7 @@ export const useAgent = () => {
         'x-algolia-api-key': process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!,
       },
     }),
+
     onToolCall: async (toolCall) => {
       console.log(toolCall);
       if (toolCall.toolCall.toolName === "display-items") {
@@ -36,6 +37,8 @@ export const useAgent = () => {
       }
     }
   })
+
+  console.log("status", status);
 
   return { messages, sendMessage, addToolOutput, status }
 }
