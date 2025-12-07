@@ -17,13 +17,13 @@ const truncateText = (text: string, maxLength = 100) => {
 };
 
 const UserMessage = ({ message }: MessageProps) => (
-  <article className={`agent-widget__message agent-widget__message--${message.role}`}>
-    <div className="agent-widget__message-body">
+  <article className="flex justify-end mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="max-w-[85%]">
       {message.parts.map((part, index) =>
         part.type === "text" ? (
           <h2
             key={`${message.id}-text-${index}`}
-            className="text-xl font-bold leading-relaxed bg-gradient-to-r from-primary via-primary/80 to-accent text-transparent bg-clip-text"
+            className="text-2xl md:text-3xl font-medium tracking-tight text-right leading-tight text-foreground/90"
           >
             {truncateText(part.text)}
           </h2>
@@ -40,21 +40,28 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
   ) as DisplayItemsToolUIPart[];
 
   return (
-    <article className={`agent-widget__message agent-widget__message--${message.role}`}>
-      <div className="agent-widget__message-body space-y-4">
-        {textParts.map((part, index) => (
-          <p key={`${message.id}-text-${index}`} className="text-lg leading-relaxed">
-            {part.type === "text" ? part.text : null}
-          </p>
-        ))}
-        {toolParts.map((part, index) => (
-          <DisplayItemsTool
-            key={`${message.id}-tool-${index}`}
-            part={part}
-            sendMessage={sendMessage}
-          />
-        ))}
-      </div>
+    <article className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+      {textParts.length > 0 && (
+        <div className="space-y-4 max-w-[90%]">
+          {textParts.map((part, index) => (
+            <p key={`${message.id}-text-${index}`} className="text-lg md:text-xl leading-relaxed text-muted-foreground">
+              {part.type === "text" ? part.text : null}
+            </p>
+          ))}
+        </div>
+      )}
+      
+      {toolParts.length > 0 && (
+        <div className="w-full pl-0 md:pl-4 border-l-2 border-primary/10">
+          {toolParts.map((part, index) => (
+            <DisplayItemsTool
+              key={`${message.id}-tool-${index}`}
+              part={part}
+              sendMessage={sendMessage}
+            />
+          ))}
+        </div>
+      )}
     </article>
   );
 };
@@ -78,17 +85,23 @@ export const AgentWidget = ({
   
   const visibleMessages = lastUserIndex === -1 ? messages : messages.slice(lastUserIndex);
 
-  return (
-    <section className="agent-widget">
-      <div className="agent-widget__messages">
-        {visibleMessages.map((message) =>
-          message.role === "user" ? (
-            <UserMessage key={message.id} message={message} />
-          ) : (
-            <AgentMessage key={message.id} message={message} sendMessage={sendMessage} />
-          ),
-        )}
+  if (visibleMessages.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 animate-in fade-in duration-500">
+        <p className="text-lg">Start a conversation by typing or using the microphone</p>
       </div>
+    );
+  }
+
+  return (
+    <section className="flex flex-col gap-8 pb-8">
+      {visibleMessages.map((message) =>
+        message.role === "user" ? (
+          <UserMessage key={message.id} message={message} />
+        ) : (
+          <AgentMessage key={message.id} message={message} sendMessage={sendMessage} />
+        ),
+      )}
     </section>
   );
 };
