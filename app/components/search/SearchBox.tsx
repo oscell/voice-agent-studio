@@ -7,9 +7,11 @@ import type { UseSearchboxResult } from "../../hooks/useSearchbox";
 
 export const SearchBox = ({
   sendMessage,
+  showMic = true,
   ...searchboxProps
 }: {
   sendMessage: (args: { text: string }) => void;
+  showMic?: boolean;
 } & Omit<UseSearchboxResult, "listening">) => {
   const {
     inputValue,
@@ -50,21 +52,23 @@ export const SearchBox = ({
                 Clear
               </Button>
             )}
-            <Button
-              type="button"
-              variant={micVariant === "destructive" ? "destructive" : micPressed ? "default" : "secondary"}
-              size="icon"
-              onClick={handleMicToggle}
-              disabled={micDisabled}
-              aria-pressed={micPressed}
-              className={`h-9 w-9 rounded-xl transition-all duration-300 ${
-                micPressed 
-                  ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20 shadow-lg scale-105" 
-                  : "hover:bg-primary/10 hover:text-primary"
-              }`}
-            >
-              <MicrophoneIcon micOpen={micPressed} />
-            </Button>
+            {showMic && (
+              <Button
+                type="button"
+                variant={micVariant === "destructive" ? "destructive" : micPressed ? "default" : "secondary"}
+                size="icon"
+                onClick={handleMicToggle}
+                disabled={micDisabled}
+                aria-pressed={micPressed}
+                className={`h-9 w-9 rounded-xl transition-all duration-300 ${
+                  micPressed 
+                    ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20 shadow-lg scale-105" 
+                    : "hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                <MicrophoneIcon micOpen={micPressed} />
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -27,10 +27,10 @@ const BrandLogo = () => (
     role="img"
   >
     <defs>
-      <linearGradient id="brand-gradient" x1="0" y1="0" x2="100%" y2="0" gradientUnits="userSpaceOnUse">
+      <linearGradient id="brand-gradient" x1="0" y1="0" x2="3200" y2="0" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#003dff" />
-        <stop offset="50%" stopColor="#0080ff" />
-        <stop offset="100%" stopColor="#00C2FF" />
+        <stop offset="60%" stopColor="#00C2FF" />
+        <stop offset="100%" stopColor="#00E0FF" />
       </linearGradient>
     </defs>
     <g fill="url(#brand-gradient)">
@@ -100,44 +100,6 @@ const BrandLogo = () => (
   </svg>
 );
 
-const AgentStudioLogo = () => (
-  <svg
-    className="h-8 w-auto"
-    viewBox="0 0 160 85"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-label="Agent Studio"
-    role="img"
-  >
-    <defs>
-      <linearGradient id="agent-gradient" x1="0" y1="0" x2="160" y2="85" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#003dff" />
-        <stop offset="100%" stopColor="#00C2FF" />
-      </linearGradient>
-    </defs>
-    <text
-      x="0"
-      y="40"
-      style={{ fontFamily: "var(--font-favorit), sans-serif", fontWeight: 100 }}
-      fontSize="48"
-      fill="url(#agent-gradient)"
-      letterSpacing="-0.04em"
-    >
-      agent
-    </text>
-    <text
-      x="0"
-      y="82"
-      style={{ fontFamily: "var(--font-favorit), sans-serif" }}
-      fontWeight="bold"
-      fontSize="48"
-      fill="url(#agent-gradient)"
-      letterSpacing="-0.04em"
-    >
-      studio
-    </text>
-  </svg>
-);
 
 
 const Home = () => {
@@ -148,15 +110,19 @@ const Home = () => {
           {/* height 4rem */}
         <div className="bg-black/90 flex items-center p-4">
           <header className="mx-auto w-full px-4 flex items-center justify-between">
-            <BrandLogo />
+            <a 
+              href="https://www.algolia.com/doc/guides/algolia-ai/agent-studio" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="cursor-pointer"
+            >
+              <BrandLogo />
+            </a>
             <div className="flex items-center gap-6 text-sm">
               <GithubLogo
                 className="w-5 h-5 cursor-pointer hover:text-white/80 transition-colors"
                 onClick={() => window.open("https://github.com/oscell/voice-agent-studio", "_blank")}
               />
-
-
-
             </div>
           </header>
         </div>

@@ -142,9 +142,12 @@ export const useSearchbox = (
                 : transcript;
 
             sendMessage({ text: finalText });
-            resetInput();
+            // Set input value to what was said, clear transcript
+            setInputValue(finalText);
+            lastVoiceTranscriptRef.current = "";
+            setTranscript("");
         }
-    }, [listening, transcript, inputValue, sendMessage, resetInput]);
+    }, [listening, transcript, inputValue, sendMessage]);
 
     // Event handlers
     const handleKeyDown = useCallback(
