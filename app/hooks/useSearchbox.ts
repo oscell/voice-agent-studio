@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 
-type UseSearchboxResult = {
+export type UseSearchboxResult = {
     // Input state
     inputValue: string;
     setInputValue: (value: string) => void;
@@ -80,7 +80,14 @@ export const useSearchbox = (
 
         recognition.onerror = (event) => {
             setListening(false);
-            setError(event.error || "speech-recognition-error");
+            // Ignore "no-speech" errors as they're normal when user doesn't speak
+            // Also ignore "aborted" errors which occur when manually stopping
+            const errorCode = event.error;
+            if (errorCode === "no-speech" || errorCode === "aborted") {
+                setError(undefined);
+            } else {
+                setError(errorCode || "speech-recognition-error");
+            }
         };
 
         recognition.onresult = (event) => {
@@ -180,11 +187,6 @@ export const useSearchbox = (
         ? `${error} (browser SpeechRecognition)`
         : undefined;
 
-    const warningMessage =
-        !supported && !error
-            ? "SpeechRecognition unavailable; Deepgram stream remains enabled."
-            : undefined;
-
     return {
         inputValue,
         setInputValue,
@@ -199,7 +201,6 @@ export const useSearchbox = (
         micVariant,
         micPressed,
         errorMessage,
-        warningMessage,
     };
 };
 

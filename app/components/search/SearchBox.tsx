@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { Textarea } from "@/components/ui/textarea";
-import { useSearchbox } from "../../hooks/useSearchbox";
+import type { UseSearchboxResult } from "../../hooks/useSearchbox";
 
 export const SearchBox = ({
   sendMessage,
+  ...searchboxProps
 }: {
   sendMessage: (args: { text: string }) => void;
-}) => {
+} & Omit<UseSearchboxResult, "listening">) => {
   const {
     inputValue,
     setInputValue,
@@ -22,7 +23,7 @@ export const SearchBox = ({
     micPressed,
     errorMessage,
     warningMessage,
-  } = useSearchbox({ sendMessage });
+  } = searchboxProps;
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -34,7 +35,7 @@ export const SearchBox = ({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
-          className="min-h-10"
+          className="min-h-10 border-none"
         />
         <Button
           type="button"

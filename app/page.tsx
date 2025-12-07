@@ -1,12 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import App from "./components/App";
-import { XIcon } from "./components/icons/XIcon";
-import { LinkedInIcon } from "./components/icons/LinkedInIcon";
-import { FacebookIcon } from "./components/icons/FacebookIcon";
 import GitHubButton from "react-github-btn";
-import { X } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
+
 const AlgoliaLogo = () => (
   <svg
     className="h-8 w-auto"
@@ -63,6 +61,39 @@ const AlgoliaLogo = () => (
   </svg>
 );
 
+const AgentStudioLogo = () => (
+  <svg
+    className="h-12 w-auto"
+    viewBox="0 0 160 85"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-label="Agent Studio"
+    role="img"
+  >
+    <text
+      x="0"
+      y="40"
+      style={{ fontFamily: "var(--font-favorit), sans-serif", fontWeight: 100 }}
+      fontSize="48"
+      fill="#003dff"
+      letterSpacing="-0.04em"
+    >
+      agent
+    </text>
+    <text
+      x="0"
+      y="82"
+      style={{ fontFamily: "var(--font-favorit), sans-serif" }}
+      fontWeight="bold"
+      fontSize="48"
+      fill="#003dff"
+      letterSpacing="-0.04em"
+    >
+      studio
+    </text>
+  </svg>
+);
+
 
 const Home = () => {
   return (
@@ -71,22 +102,13 @@ const Home = () => {
         {/* height 4rem */}
         <div className="bg-gradient-to-b from-black/50 to-black/10 backdrop-blur-[2px] h-[4rem] flex items-center">
           <header className="mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8 flex items-center justify-between">
-            <div>
-              <a className="flex items-center gap-2" href="/">
-                <Image
-                  className="w-auto h-8 max-w-[12.5rem] sm:max-w-none"
-                  src="/deepgram.svg"
-                  alt="Deepgram Logo"
-                  width={0}
-                  height={0}
-                  priority
-                />
-                <X className="w-6 h-6 font-bold text-xl" />
-                <AlgoliaLogo />
-              </a>
+            <div className="flex items-center gap-4">
+              <AlgoliaLogo />
+              <Separator orientation="vertical" className="h-4 bg-white " />
+              <AgentStudioLogo />
             </div>
             <div className="flex items-center gap-6 text-sm">
-              <span className="mt-1">
+
                 <GitHubButton
                   href="https://github.com/oscell/voice-agent-studio"
                   data-color-scheme="no-preference: light; light: light; dark: light;"
@@ -96,7 +118,7 @@ const Home = () => {
                 >
                   Star
                 </GitHubButton>
-              </span>
+
 
               <span className="gradient-shadow bg-gradient-to-r to-[#13EF93]/50 from-[#149AFB]/80 rounded">
                 <a
