@@ -24,7 +24,7 @@ const App: () => JSX.Element = () => {
   } = useAgentChat();
 
   return (
-    <div className="relative flex w-[400px] h-full antialiased overflow-hidden bg-background text-foreground selection:bg-primary/10 selection:text-primary">
+    <div className="relative flex w-full h-full antialiased overflow-hidden bg-background text-foreground selection:bg-primary/10 selection:text-primary">
       {listening && (
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Visualizer />

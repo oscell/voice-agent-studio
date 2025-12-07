@@ -116,11 +116,8 @@ const BrandLogo = () => (
 const Home = () => {
   return (
     <>
-      <div className="fixed top-4 right-4 z-50 ">
-        <ThemeToggle />
-      </div>
       <div className="flex items-center justify-center min-h-screen">
-        <div className="h-[calc(100vh-4rem)] overflow-hidden max-w-md mx-auto border-2 rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+        <div className="h-screen md:h-[calc(100vh-4rem)] overflow-hidden w-full max-w-none md:max-w-md mx-auto border-0 md:border-2 rounded-none md:rounded-3xl shadow-none md:shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-none md:dark:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
           {/* height 4rem */}
           <div className="bg-white/90 dark:bg-black/90 flex items-center pt-4">
             <header className="mx-auto w-full px-4 flex items-center justify-between py-2">
@@ -132,7 +129,8 @@ const Home = () => {
               >
                 <BrandLogo />
               </a>
-              <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-4 md:gap-6 text-sm">
+                <ThemeToggle />
                 <GithubLogo
                   className="w-5 h-5 cursor-pointer hover:text-black/80 dark:hover:text-white/80 transition-colors"
                   onClick={() =>
