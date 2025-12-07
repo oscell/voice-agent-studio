@@ -16,6 +16,7 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "ai": "^5.0.106",
     "algoliasearch": "^5.45.0",

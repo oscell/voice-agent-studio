@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Article } from "@/lib/types/Product";
 import { ArticleCard } from "./DisplayItemsTool";
 import { cn } from "@/lib/utils";
@@ -48,34 +49,48 @@ export function SummaryWithSourcesTool({
   });
 
   return (
-    <div className={cn("w-full space-y-6", className)}>
-      {items.map((item, index) => (
-        <div key={index} className="space-y-2">
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            {item.text}{" "}
-            {item.objectIds.map((id, refIndex) => {
-              const article = articlesMap.get(id);
-              if (!article) return null;
+    <TooltipProvider delayDuration={100}>
+      <div className={cn("relative w-full space-y-6", className)}>
+        {items.map((item, index) => (
+          <div key={index} className="space-y-2">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {item.text}{" "}
+              {item.objectIds.map((id, refIndex) => {
+                const article = articlesMap.get(id);
+                if (!article) return null;
 
-              return (
-                <span
-                  key={id}
-                  className="relative group inline-flex items-center align-baseline ml-1"
-                >
-                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1 text-[11px] font-semibold text-primary ring-1 ring-primary/20">
-                    {refIndex + 1}
+                return (
+                  <span
+                    key={id}
+                    className="inline-flex items-center align-baseline ml-1"
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1 text-[11px] font-semibold text-primary ring-1 ring-primary/20 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background transition-shadow"
+                          aria-label={`View source ${refIndex + 1}`}
+                        >
+                          {refIndex + 1}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        sideOffset={10}
+                        className="w-72 p-0 rounded-xl border border-border/70 bg-background shadow-xl shadow-primary/10"
+                        hideArrow
+                      >
+                        <ArticleCard article={article} />
+                      </TooltipContent>
+                    </Tooltip>
                   </span>
-                  <div className="absolute left-1/2 top-full z-30 mt-2 hidden -translate-x-1/2 whitespace-normal group-hover:block">
-                    <div className="w-72 rounded-xl border border-border/70 bg-background shadow-xl shadow-primary/10">
-                      <ArticleCard article={article} />
-                    </div>
-                  </div>
-                </span>
-              );
-            })}
-          </p>
-        </div>
-      ))}
-    </div>
+                );
+              })}
+            </p>
+          </div>
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
