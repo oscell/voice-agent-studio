@@ -16,6 +16,7 @@ import config from "@/lib/constants";
 import { DisplayItemsInput } from "../components/agent/tools/DisplayItemsTool";
 import { SummaryWithSourcesInput } from "../components/agent/tools/SummaryWithSourcesTool";
 import { Article } from "@/lib/types/Product";
+import { useSpeechSettings } from "../context/SpeechSettingsContext";
 
 export type UseAgentChatResult = {
   // Agent chat state
@@ -46,6 +47,8 @@ export type UseAgentChatResult = {
   // Error/warning messages
   errorMessage?: string;
   warningMessage?: string;
+  language: "en-US" | "fr-FR";
+  setLanguage: (lang: "en-US" | "fr-FR") => void;
 };
 
 /**
@@ -84,14 +87,14 @@ export const useAgentChat = (): UseAgentChatResult => {
       } else if (
         toolCall.toolCall.toolName === "summary-with-sources"
       ) {
-        console.log("summary-with-sources", toolCall.toolCall);
         const input = toolCall.toolCall.input as SummaryWithSourcesInput;
         const indexName = config.verticals.articles.indexName;
-        
+
         const allObjectIds = input.items?.flatMap((item) => item.objectIds) || [];
         const uniqueObjectIds = Array.from(new Set(allObjectIds));
 
         const articles = await getObjectsByIds<Article>(uniqueObjectIds, indexName);
+
 
         addToolOutput({
           tool: toolCall.toolCall.toolName,
@@ -101,6 +104,12 @@ export const useAgentChat = (): UseAgentChatResult => {
             response: articles,
           },
         });
+
+
+
+
+
+
       }
     },
   });
@@ -108,6 +117,7 @@ export const useAgentChat = (): UseAgentChatResult => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
+  const { language, setLanguage } = useSpeechSettings();
   const [supported, setSupported] = useState(false);
   const [supportChecked, setSupportChecked] = useState(false);
   const [listening, setListening] = useState(false);
@@ -131,7 +141,7 @@ export const useAgentChat = (): UseAgentChatResult => {
     const recognition: SpeechRecognition = new SpeechRecognitionCtor();
     recognition.continuous = false; // press-to-talk
     recognition.interimResults = true;
-    recognition.lang = "en-US";
+    recognition.lang = language;
 
     recognition.onstart = () => {
       setListening(true);
@@ -168,7 +178,7 @@ export const useAgentChat = (): UseAgentChatResult => {
       recognitionRef.current?.stop();
       recognitionRef.current = null;
     };
-  }, []);
+  }, [language]);
 
   // Reset input and all refs
   const resetInput = useCallback(() => {
@@ -266,5 +276,7 @@ export const useAgentChat = (): UseAgentChatResult => {
     micPressed,
     errorMessage,
     warningMessage,
+    language,
+    setLanguage,
   };
 };

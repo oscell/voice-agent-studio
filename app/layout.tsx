@@ -9,6 +9,8 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
 import { ThemeProvider } from "./components/theme-provider";
+import { SpeechSettingsProvider } from "./context/SpeechSettingsContext";
+import LanguageSelect from "./components/LanguageSelect";
 
 const inter = Inter({ subsets: ["latin"] });
 const favorit = localFont({
@@ -47,14 +49,19 @@ export default function RootLayout({
         )}`}
       >
         <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-          <MicrophoneContextProvider>
-            {children}
-          </MicrophoneContextProvider>
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SpeechSettingsProvider>
+            <div className="fixed top-4 right-4 z-50">
+              <LanguageSelect />
+            </div>
+            <MicrophoneContextProvider>
+              {children}
+            </MicrophoneContextProvider>
+          </SpeechSettingsProvider>
         </ThemeProvider>
       </body>
     </html>
