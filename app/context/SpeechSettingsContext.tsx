@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type Language = "en-US" | "fr-FR";
+type Language = "en-US" | "fr-FR" | "es-ES" | "it-IT" | "de-DE";
 
 type SpeechSettingsContextValue = {
   language: Language;

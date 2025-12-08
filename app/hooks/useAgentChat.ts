@@ -47,8 +47,8 @@ export type UseAgentChatResult = {
   // Error/warning messages
   errorMessage?: string;
   warningMessage?: string;
-  language: "en-US" | "fr-FR";
-  setLanguage: (lang: "en-US" | "fr-FR") => void;
+  language: "en-US" | "fr-FR" | "es-ES" | "it-IT" | "de-DE";
+  setLanguage: (lang: "en-US" | "fr-FR" | "es-ES" | "it-IT" | "de-DE") => void;
 };
 
 /**
