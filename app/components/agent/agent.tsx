@@ -140,7 +140,7 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
         <div className="w-full pl-6">
           {summaryWithSourcesParts.map((part, index) => (
             <SummaryWithSourcesTool
-              key={`${message.id}-summary-${index}`}
+                  key={part.toolCallId ?? `${message.id}-summary-${index}`}
               part={part}
             />
           ))}
