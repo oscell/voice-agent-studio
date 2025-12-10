@@ -17,7 +17,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import config from "@/lib/constants";
 
 type MessageProps = {
   message: UIMessage;
@@ -37,6 +36,21 @@ const truncateText = (text: string, maxLength = 100) => {
   return text.length > maxLength
     ? `${text.slice(0, maxLength).trimEnd()}…`
     : text;
+};
+
+// Show only the user's typed input, not any appended context sent to the agent.
+const extractUserInput = (text: string) => {
+  if (!text) return text;
+  const firstLine = text.split("\n")[0].trim();
+  const searchPrefix = "search query:";
+
+  if (firstLine.toLowerCase().startsWith(searchPrefix)) {
+    const match = firstLine.match(/Search query:\s*"?([^"]+)"?/i);
+    if (match?.[1]) return match[1];
+    return firstLine.slice(searchPrefix.length).trim();
+  }
+
+  return firstLine;
 };
 
 const isSummaryWithSourcesPart = (part: UIMessage["parts"][number]) =>
@@ -89,7 +103,10 @@ const UserMessageTrigger = ({
                     : "text-sm text-green-500 group-hover:text-green-400"
                 }`}
               >
-                {truncateText(part.text, isOpen ? 20 : 30)}
+                {truncateText(
+                  extractUserInput(part.text),
+                  isOpen ? 20 : 30
+                )}
               </span>
             ) : null
           )}
@@ -99,11 +116,8 @@ const UserMessageTrigger = ({
   </CollapsibleTrigger>
 );
 
-const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
+const AgentMessage = ({ message }: { message: UIMessage }) => {
   const textParts = message.parts.filter((part) => part.type === "text");
-  const displayItemsParts = message.parts.filter(
-    (part) => part.type === "tool-display-items"
-  ) as DisplayItemsToolUIPart[];
   const summaryWithSourcesParts = message.parts.filter(isSummaryWithSourcesPart) as SummaryWithSourcesToolUIPart[];
 
   return (
@@ -124,17 +138,6 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
         </div>
       )}
 
-      {displayItemsParts.length > 0 && (
-        <div className="w-full pl-6">
-          {displayItemsParts.map((part, index) => (
-            <DisplayItemsTool
-              key={`${message.id}-tool-${index}`}
-              part={part}
-              sendMessage={sendMessage}
-            />
-          ))}
-        </div>
-      )}
 
       {summaryWithSourcesParts.length > 0 && (
         <div className="w-full pl-6">
@@ -152,11 +155,9 @@ const AgentMessage = ({ message, sendMessage }: AgentMessageProps) => {
 
 const ConversationTurnItem = ({
   turn,
-  sendMessage,
   defaultOpen = false,
 }: {
   turn: ConversationTurn;
-  sendMessage: (args: { text: string }) => void;
   defaultOpen?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -170,7 +171,6 @@ const ConversationTurnItem = ({
             <AgentMessage
               key={agentMsg.id}
               message={agentMsg}
-              sendMessage={sendMessage}
             />
           ))}
         </div>
@@ -181,17 +181,9 @@ const ConversationTurnItem = ({
 
 export const AgentWidget = ({
   messages,
-  sendMessage,
-  handleMicToggle,
-  micDisabled,
-  micPressed,
   status,
 }: {
   messages: UIMessage[];
-  sendMessage: (args: { text: string }) => void;
-  handleMicToggle: () => void;
-  micDisabled: boolean;
-  micPressed: boolean;
   status: "submitted" | "streaming" | "ready" | "error";
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -219,51 +211,6 @@ export const AgentWidget = ({
 
     return turns;
   }, [messages]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  if (messages.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 animate-in fade-in duration-500">
-        <button
-          type="button"
-          onClick={handleMicToggle}
-          disabled={micDisabled}
-          aria-pressed={micPressed}
-          className={`h-20 w-20 rounded-full flex items-center justify-center transition-all duration-300 mb-4 ${
-            micPressed
-              ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20 shadow-lg scale-105"
-              : "bg-secondary hover:bg-primary/10 hover:text-primary"
-          }`}
-        >
-          <MicrophoneIcon micOpen={micPressed} className="h-10 w-10" />
-        </button>
-        <p className="text-lg mb-6">
-          Press the microphone to start a conversation
-        </p>
-
-        {config.verticals.articles.quickPrompts.length > 0 && (
-          <div className="flex flex-col gap-2 w-full max-w-xs">
-            <p className="text-xs text-muted-foreground/70 mb-1">
-              Or try one of these:
-            </p>
-            {config.verticals.articles.quickPrompts.map((prompt, index) => (
-              <button
-                key={index}
-                onClick={() => sendMessage({ text: prompt.message })}
-                className="px-4 py-2 text-sm rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-left"
-              >
-                {prompt.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   const lastTurnIndex = conversationTurns.length - 1;
   const hasHistory = conversationTurns.length > 1;
@@ -301,7 +248,6 @@ export const AgentWidget = ({
             <ConversationTurnItem
               key={turn.userMessage.id}
               turn={turn}
-              sendMessage={sendMessage}
               defaultOpen={false}
             />
           ))}
@@ -309,28 +255,10 @@ export const AgentWidget = ({
       {/* Current/latest conversation turn (always visible, not collapsible) */}
       {conversationTurns.length > 0 && (
         <div className="flex flex-col gap-4">
-          <article className="flex justify-end relative">
-            <div className="absolute right-0 top-0 bottom-0 w-1 bg-green-500 rounded-full" />
-            <div className="absolute inset-0 bg-gradient-to-l from-green-500/10 to-transparent pointer-events-none -z-10" />
-            <div className="max-w-[85%] pr-6 py-2">
-              {conversationTurns[lastTurnIndex].userMessage.parts.map(
-                (part, index) =>
-                  part.type === "text" ? (
-                    <h2
-                      key={`${conversationTurns[lastTurnIndex].userMessage.id}-text-${index}`}
-                      className="text-2xl md:text-3xl font-medium tracking-tight text-right leading-tight text-foreground/90"
-                    >
-                      {truncateText(part.text, 100)}
-                    </h2>
-                  ) : null
-              )}
-            </div>
-          </article>
           {conversationTurns[lastTurnIndex].agentMessages.map((agentMsg) => (
             <AgentMessage
               key={agentMsg.id}
               message={agentMsg}
-              sendMessage={sendMessage}
             />
           ))}
           {showLoading && (

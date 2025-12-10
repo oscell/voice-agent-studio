@@ -106,10 +106,6 @@ export const useAgentChat = (): UseAgentChatResult => {
         });
 
 
-
-
-
-
       }
     },
   });
@@ -200,11 +196,6 @@ export const useAgentChat = (): UseAgentChatResult => {
     recognitionRef.current?.stop();
   }, []);
 
-  useEffect(() => {
-    if (listening) {
-      setTranscript("");
-    }
-  }, [listening]);
 
   useEffect(() => {
     if (!listening && transcript) {
@@ -224,11 +215,10 @@ export const useAgentChat = (): UseAgentChatResult => {
         e.preventDefault();
         if (inputValue.trim()) {
           sendMessage({ text: inputValue.trim() });
-          resetInput();
         }
       }
     },
-    [inputValue, sendMessage, resetInput]
+    [inputValue, sendMessage]
   );
 
   const handleClear = useCallback(() => {

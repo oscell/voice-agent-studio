@@ -1,14 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { useInfiniteHits } from "react-instantsearch";
 import { useRouter } from "next/navigation";
-import { useSearchBox } from "react-instantsearch";
-import type { Product } from "@/lib/types/Product";
+import type { Article } from "@/lib/types/Product";
 import { Button } from "@/components/ui/button";
 import { ShoppingBasket } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { ArticleCard } from "../agent/tools/DisplayItemsTool";
 
-function Hit({ hit }: { hit: Product }) {
+type HitsProps = {
+  onTopHitsChange?: (hits: Article[]) => void;
+  limit?: number;
+};
+function Hit({ hit }: { hit: Article }) {
   const router = useRouter();
 
   return (
@@ -22,7 +26,7 @@ function Hit({ hit }: { hit: Product }) {
       <div
         className="relative w-full aspect-square bg-muted bg-cover bg-center transition-all duration-500 ease-in-out"
         style={{
-          backgroundImage: `url(${hit.image})`,
+          backgroundImage: `url(${hit.url})`,
         }}
       >
         {/* Gradient overlay for better text readability */}
@@ -48,70 +52,41 @@ function Hit({ hit }: { hit: Product }) {
       <div className="p-4 space-y-2">
         {/* Brand */}
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          {hit.name}
+          {hit.author}
         </div>
 
         {/* Title */}
         <h3 className="text-sm font-semibold text-foreground line-clamp-2 min-h-[2.5rem] group-hover:text-accent transition-colors">
-          {hit.name}
+          {hit.title}
         </h3>
 
         {/* Product Attributes */}
-        <div className="flex flex-wrap gap-1.5">{hit.desc}</div>
+        <div className="flex flex-wrap gap-1.5">{hit.article}</div>
 
         {/* Description */}
         <div className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem] group-hover:text-accent transition-colors">
-          {hit.desc}
+          {hit.article}
         </div>
       </div>
     </div>
   );
 }
 
-export function Hits() {
-  const { items, isLastPage, showMore } = useInfiniteHits<Product>({});
-  const { query } = useSearchBox();
-  const loadingRef = useRef<HTMLDivElement>(null);
-  const shouldShowHomePage = (query?.trim().length ?? 0) === 0;
+export function Hits({ onTopHitsChange, limit = 10 }: HitsProps) {
+  const { items } = useInfiniteHits<Article>({});
 
   useEffect(() => {
-    if (shouldShowHomePage) return;
-    if (!loadingRef.current || isLastPage) return;
-    const target = loadingRef.current;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting) {
-          showMore();
-        }
-      },
-      { root: null, rootMargin: "200px 0px", threshold: 0 }
-    );
-
-    observer.observe(target);
-
-    return () => {
-      observer.unobserve(target);
-    };
-  }, [isLastPage, showMore, items.length, shouldShowHomePage]);
+    if (!onTopHitsChange) return;
+    onTopHitsChange(items.slice(0, limit));
+  }, [items, limit, onTopHitsChange]);
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4">
+      <div className="grid grid-cols-2 w-full gap-4">
         {items.map((hit) => (
-          <Hit key={hit.objectID} hit={hit} />
+          <ArticleCard key={hit.objectID} article={hit} />
         ))}
       </div>
-
-      {!isLastPage && (
-        <div
-          ref={loadingRef}
-          className="h-8 w-full flex items-center justify-center"
-        >
-          <span className="text-xs text-muted-foreground">Loading more…</span>
-        </div>
-      )}
     </>
   );
 }

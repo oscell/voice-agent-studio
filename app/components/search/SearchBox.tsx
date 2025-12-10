@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +28,7 @@ export const SearchBox = ({
   showMic = true,
   ...searchboxProps
 }: SearchBoxProps) => {
-  const { refine } = useSearchBox();
+  const { query, refine } = useSearchBox();
   const {
     inputValue,
     setInputValue,
@@ -42,6 +43,14 @@ export const SearchBox = ({
     warningMessage,
   } = searchboxProps;
 
+  // When the inputValue changes outside this component (e.g. voice result),
+  // push it into InstantSearch so the UI doesn't get reset by stale query state.
+  useEffect(() => {
+    if (inputValue !== query) {
+      refine(inputValue);
+    }
+  }, [inputValue, query, refine]);
+
   return (
     <div className="relative group z-50">
       <div className="flex flex-col gap-2 p-1.5 bg-background/80 backdrop-blur-xl border shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:border-primary/20 focus-within:shadow-lg focus-within:border-primary/30">
@@ -50,7 +59,11 @@ export const SearchBox = ({
             ref={inputRef}
             placeholder="Ask me anything..."
             value={inputValue}
-            onChange={(e) => refine(e.target.value)}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setInputValue(nextValue);
+              refine(nextValue);
+            }}
             onKeyDown={handleKeyDown}
             rows={1}
             className="min-h-[44px] max-h-[200px] py-2.5 px-0 border-none shadow-none focus-visible:ring-0 resize-none bg-transparent text-base placeholder:text-muted-foreground/50 leading-relaxed"
@@ -61,7 +74,10 @@ export const SearchBox = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={handleClear}
+                onClick={() => {
+                  handleClear();
+                  refine("");
+                }}
                 className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground rounded-lg"
               >
                 Clear

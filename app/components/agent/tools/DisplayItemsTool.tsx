@@ -1,7 +1,13 @@
 import type { UIMessage } from "@ai-sdk/react";
 import Image from "next/image";
 import { useState } from "react";
-import { ExternalLink, Newspaper, User, Calendar, Building2 } from "lucide-react";
+import {
+  ExternalLink,
+  Newspaper,
+  User,
+  Calendar,
+  Building2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -93,18 +99,24 @@ export function ArticleCard({ article }: { article: Article }) {
         <div className="flex flex-col gap-1 text-[10px] text-muted-foreground pl-5">
           <div className="flex items-center gap-1">
             <User className="h-2.5 w-2.5" />
-            <span className="font-medium truncate max-w-[140px]">{article.author}</span>
+            <span className="font-medium truncate max-w-[140px]">
+              {article.author}
+            </span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {article.publication && (
               <div className="flex items-center gap-1">
                 <Building2 className="h-2.5 w-2.5" />
-                <span className="truncate max-w-[100px] italic">{article.publication}</span>
+                <span className="truncate max-w-[100px] italic">
+                  {article.publication}
+                </span>
               </div>
             )}
             <div className="flex items-center gap-1">
               <Calendar className="h-2.5 w-2.5" />
-              <span className="whitespace-nowrap tabular-nums">{formatDate(article.year, article.month, article.day)}</span>
+              <span className="whitespace-nowrap tabular-nums">
+                {formatDate(article.year, article.month, article.day)}
+              </span>
             </div>
           </div>
         </div>
