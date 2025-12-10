@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { Textarea } from "@/components/ui/textarea";
 import type { UseAgentChatResult } from "../../hooks/useAgentChat";
+import { useSearchBox } from "react-instantsearch";
 
 type SearchBoxProps = {
   showMic?: boolean;
@@ -26,6 +27,7 @@ export const SearchBox = ({
   showMic = true,
   ...searchboxProps
 }: SearchBoxProps) => {
+  const { refine } = useSearchBox();
   const {
     inputValue,
     setInputValue,
@@ -48,7 +50,7 @@ export const SearchBox = ({
             ref={inputRef}
             placeholder="Ask me anything..."
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => refine(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={1}
             className="min-h-[44px] max-h-[200px] py-2.5 px-0 border-none shadow-none focus-visible:ring-0 resize-none bg-transparent text-base placeholder:text-muted-foreground/50 leading-relaxed"

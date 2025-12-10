@@ -3,6 +3,11 @@ import { SearchBox } from "./search/SearchBox";
 import { AgentWidget } from "./agent/agent";
 import Visualizer from "./Visualizer";
 import { useAgentChat } from "../hooks/useAgentChat";
+import { Hits } from "./search/Hits";
+import { InstantSearch } from "react-instantsearch";
+import { algoliasearch } from "algoliasearch";
+import config from "@/lib/constants";
+
 
 const App: () => JSX.Element = () => {
   const {
@@ -24,6 +29,7 @@ const App: () => JSX.Element = () => {
   } = useAgentChat();
 
   return (
+    <InstantSearch indexName="news_paper_generic_v2" searchClient={algoliasearch(config.algolia.appId!, config.algolia.apiKey!)}>
     <div className="relative flex w-full h-full antialiased overflow-hidden bg-background text-foreground selection:bg-primary/10 selection:text-primary">
       {listening && (
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -56,9 +62,12 @@ const App: () => JSX.Element = () => {
               status={status}
             />
           </div>
+
+          {/* <Hits /> */}
         </div>
       </div>
     </div>
+    </InstantSearch>
   );
 };
 
