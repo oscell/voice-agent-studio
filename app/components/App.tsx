@@ -5,15 +5,22 @@ import { AgentWidget } from "./agent/agent";
 import Visualizer from "./Visualizer";
 import { useAgentChat } from "../hooks/useAgentChat";
 import { Hits } from "./search/Hits";
-import { InstantSearch, useSearchBox } from "react-instantsearch";
+import { Index, InstantSearch, useSearchBox } from "react-instantsearch";
 import { algoliasearch } from "algoliasearch";
 import config from "@/lib/constants";
 import { MicrophoneIcon } from "./icons/MicrophoneIcon";
 import type { Article } from "@/lib/types/Product";
+import { Suggestions } from "./search/Suggestions";
 
 const App: () => JSX.Element = () => {
   return (
-    <InstantSearch indexName="news_paper_generic_v2" searchClient={algoliasearch(config.algolia.appId!, config.algolia.apiKey!)}>
+    <InstantSearch
+      indexName="news_paper_generic_v2"
+      searchClient={algoliasearch(
+        config.algolia.appId!,
+        config.algolia.apiKey!
+      )}
+    >
       <Page />
     </InstantSearch>
   );
@@ -107,7 +114,7 @@ const Page = () => {
             showMic={messages.length > 0}
           />
 
-          {(messages.length === 0 && query === "") && (
+          {messages.length === 0 && query === "" && (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 animate-in fade-in duration-500">
               <button
                 type="button"
@@ -131,25 +138,27 @@ const Page = () => {
                   <p className="text-xs text-muted-foreground/70 mb-1">
                     Or try one of these:
                   </p>
-                  {config.verticals.articles.quickPrompts.map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setInputValue(prompt.message)}
-                      className="px-4 py-2 text-sm rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-left"
-                    >
-                      {prompt.label}
-                    </button>
-                  ))}
+                  {config.verticals.articles.quickPrompts.map(
+                    (prompt, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setInputValue(prompt.message)}
+                        className="px-4 py-2 text-sm rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-left"
+                      >
+                        {prompt.label}
+                      </button>
+                    )
+                  )}
                 </div>
               )}
             </div>
           )}
 
           <div className="flex-1 overflow-y-auto min-h-0 pr-2 scrollbar-hide">
-            <AgentWidget
-              messages={messages}
-              status={status}
-            />
+            <Index indexName="news_paper_generic_v2_query_suggestions">
+              <Suggestions setInputValue={setInputValue} inputValue={inputValue}/>
+            </Index>
+            <AgentWidget messages={messages} status={status} />
             <Hits onTopHitsChange={setTopHits} />
           </div>
         </div>

@@ -1,30 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
-import {
-  DisplayItemsTool,
-  DisplayItemsToolUIPart,
-} from "./tools/DisplayItemsTool";
+import { useRef, useState, useMemo } from "react";
 import {
   SummaryWithSourcesTool,
   SummaryWithSourcesToolUIPart,
 } from "./tools/SummaryWithSourcesTool";
 import { UIMessage } from "@ai-sdk/react";
-import { MicrophoneIcon } from "../icons/MicrophoneIcon";
 import { ChevronDown, ChevronUp, History } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-
-type MessageProps = {
-  message: UIMessage;
-};
-
-type AgentMessageProps = MessageProps & {
-  sendMessage: (args: { text: string }) => void;
-};
 
 type ConversationTurn = {
   userMessage: UIMessage;
@@ -103,10 +90,7 @@ const UserMessageTrigger = ({
                     : "text-sm text-green-500 group-hover:text-green-400"
                 }`}
               >
-                {truncateText(
-                  extractUserInput(part.text),
-                  isOpen ? 20 : 30
-                )}
+                {truncateText(extractUserInput(part.text), isOpen ? 20 : 30)}
               </span>
             ) : null
           )}
@@ -118,7 +102,9 @@ const UserMessageTrigger = ({
 
 const AgentMessage = ({ message }: { message: UIMessage }) => {
   const textParts = message.parts.filter((part) => part.type === "text");
-  const summaryWithSourcesParts = message.parts.filter(isSummaryWithSourcesPart) as SummaryWithSourcesToolUIPart[];
+  const summaryWithSourcesParts = message.parts.filter(
+    isSummaryWithSourcesPart
+  ) as SummaryWithSourcesToolUIPart[];
 
   return (
     <article className="flex flex-col gap-6 relative">
@@ -138,12 +124,11 @@ const AgentMessage = ({ message }: { message: UIMessage }) => {
         </div>
       )}
 
-
       {summaryWithSourcesParts.length > 0 && (
         <div className="w-full pl-6">
           {summaryWithSourcesParts.map((part, index) => (
             <SummaryWithSourcesTool
-                  key={part.toolCallId ?? `${message.id}-summary-${index}`}
+              key={part.toolCallId ?? `${message.id}-summary-${index}`}
               part={part}
             />
           ))}
@@ -168,10 +153,7 @@ const ConversationTurnItem = ({
       <CollapsibleContent className="animate-in fade-in slide-in-from-top-2 duration-300">
         <div className="flex flex-col gap-4 mt-4">
           {turn.agentMessages.map((agentMsg) => (
-            <AgentMessage
-              key={agentMsg.id}
-              message={agentMsg}
-            />
+            <AgentMessage key={agentMsg.id} message={agentMsg} />
           ))}
         </div>
       </CollapsibleContent>
@@ -256,10 +238,7 @@ export const AgentWidget = ({
       {conversationTurns.length > 0 && (
         <div className="flex flex-col gap-4">
           {conversationTurns[lastTurnIndex].agentMessages.map((agentMsg) => (
-            <AgentMessage
-              key={agentMsg.id}
-              message={agentMsg}
-            />
+            <AgentMessage key={agentMsg.id} message={agentMsg} />
           ))}
           {showLoading && (
             <div className="flex items-center gap-2 text-muted-foreground animate-pulse pl-6">

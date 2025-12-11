@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Article } from "@/lib/types/Product";
-import { ArticleCard } from "./DisplayItemsTool";
+import { ArticleCard } from "@/app/components/agent/tools/DisplayItemsTool";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
