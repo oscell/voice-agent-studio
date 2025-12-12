@@ -2,8 +2,6 @@ import { Inter } from "next/font/google";
 import classNames from "classnames";
 import localFont from "next/font/local";
 
-
-
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";

@@ -6,19 +6,17 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
   type RefObject,
 } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { getObjectsByIds } from "@/lib/getObjectByIDs";
+import { getObjectsByIds, UpdateSuggestion } from "@/lib/getObjectByIDs";
 import config from "@/lib/constants";
-import { DisplayItemsInput } from "../components/agent/tools/DisplayItemsTool";
 import { SummaryWithSourcesInput } from "../components/agent/tools/SummaryWithSourcesTool";
 import { Article } from "@/lib/types/Product";
 import { useSpeechSettings } from "../context/SpeechSettingsContext";
-import { useHits } from "react-instantsearch";
-
+import { useHits, useSearchBox } from "react-instantsearch";
+import type { Suggestion } from "@/app/components/search/Suggestions";
 export type UseAgentChatResult = {
   // Agent chat state
   messages: ReturnType<typeof useChat>["messages"];
@@ -36,7 +34,6 @@ export type UseAgentChatResult = {
   error?: string;
 
   // Event handlers
-  handleKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   handleClear: () => void;
   handleMicToggle: () => void;
   handleSubmit: (query: string) => void;
@@ -73,29 +70,26 @@ export const useAgentChat = (): UseAgentChatResult => {
       },
     }),
     onToolCall: async (toolCall) => {
-      if (toolCall.toolCall.toolName === "display-items") {
-        const input = toolCall.toolCall.input as DisplayItemsInput;
-        const indexName = config.verticals.articles.indexName;
-        const products = await getObjectsByIds<Article>(input.objectIDs, indexName);
-
-        addToolOutput({
-          tool: toolCall.toolCall.toolName,
-          toolCallId: toolCall.toolCall.toolCallId,
-          state: "output-available",
-          output: {
-            response: products,
-          },
-        });
-      } else if (
+      if (
         toolCall.toolCall.toolName === "summary-with-sources"
       ) {
         const input = toolCall.toolCall.input as SummaryWithSourcesInput;
+
         const indexName = config.verticals.articles.indexName;
 
         const allObjectIds = input.items?.flatMap((item) => item.objectIds) || [];
         const uniqueObjectIds = Array.from(new Set(allObjectIds));
 
         const articles = await getObjectsByIds<Article>(uniqueObjectIds, indexName);
+
+        // Attach the tool input to the suggestion corresponding to the latest query.
+        if (lastSubmittedQueryRef.current) {
+          await UpdateSuggestion(
+            lastSubmittedQueryRef.current,
+            undefined,
+            input
+          );
+        }
 
 
         addToolOutput({
@@ -113,9 +107,21 @@ export const useAgentChat = (): UseAgentChatResult => {
   });
 
   const { results } = useHits<Article>();
+  const { refine: refineRootQuery } = useSearchBox();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  // Track last query/result IDs to update the related suggestion when tool output arrives.
+  const lastSubmittedQueryRef = useRef<string | null>(null);
+  const lastResultObjectIdsRef = useRef<string[] | null>(null);
+  const latestResultsRef = useRef<typeof results | null>(results);
+
+  const arraysEqualIgnoreOrder = (a: string[] = [], b: string[] = []) => {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    return sortedA.every((val, idx) => val === sortedB[idx]);
+  };
 
   const { language, setLanguage } = useSpeechSettings();
   const [supported, setSupported] = useState(false);
@@ -124,6 +130,10 @@ export const useAgentChat = (): UseAgentChatResult => {
   const [transcript, setTranscript] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    latestResultsRef.current = results;
+  }, [results]);
 
   // Initialize SpeechRecognition
   useEffect(() => {
@@ -213,32 +223,110 @@ export const useAgentChat = (): UseAgentChatResult => {
     }
   }, [listening, transcript, inputValue, sendMessage]);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (inputValue.trim()) {
-          sendMessage({ text: inputValue.trim() });
-        }
-      }
+
+
+  const constructAgentMessage = useCallback(
+    (userQuery: string, topResults: Article[]) => {
+      const top10 = topResults.slice(0, 10);
+      const items = top10.map((hit) => `- ${hit.title}`).join("\n");
+      return `Query: ${userQuery}\nTop results:\n${items}`.trim();
     },
-    [inputValue, sendMessage]
+    []
   );
 
   const handleSubmit = useCallback(
-    (query: string) => {
+    async (query: string) => {
       const text = query.trim();
       if (!text) return;
 
-      const hits = results?.hits ?? [];
-      // TODO: optionally enrich the message with hits if needed.
-      void hits;
+      // Keep InstantSearch as the single source of truth: update the root query,
+      // then wait for matching results before sending to the agent.
+      refineRootQuery(text);
 
-      sendMessage({ text });
-      setInputValue(text);
+      const waitForResults = async () => {
+        const target = text.toLowerCase();
+        const timeoutMs = 600;
+        const stepMs = 50;
+        const start = performance.now();
+
+        while (performance.now() - start < timeoutMs) {
+          const current = latestResultsRef.current;
+          const currentQuery = current?.query?.toLowerCase();
+          if (currentQuery === target) {
+            return current;
+          }
+          await new Promise((resolve) => setTimeout(resolve, stepMs));
+        }
+        return latestResultsRef.current;
+      };
+
+      const freshResults = await waitForResults();
+      const hits = (freshResults?.hits as Article[]) ?? results?.hits ?? [];
+      const suggestion = (await getObjectsByIds<Suggestion>([query], "news_paper_generic_v2_query_suggestions"))[0];
+
+
+      // Normalize current hit IDs: dedupe, cap at 10, and keep stable order.
+      const result_object_ids = Array.from(new Set(hits.map((hit) => hit.objectID))).slice(0, 10);
+      const result_names = hits.slice(0, 10).map((hit) => hit.title);
+      console.log("result_names", result_names);
+      console.log("result_object_ids", result_object_ids);
+
+      const suggestion_object_ids = suggestion?.result_object_ids ?? [];
+
+
+
+      // Remember the latest query and result IDs so we can update its suggestion with tool output.
+      lastSubmittedQueryRef.current = text;
+      lastResultObjectIdsRef.current = result_object_ids;
+
+      console.groupCollapsed("handleSubmit suggestion click");
+      console.log("submitted text", text);
+      console.log("instantsearch refine query", text);
+      console.log("hit count", hits.length);
+      console.log("hit IDs", result_object_ids);
+      console.log("hit titles", result_names);
+      console.log("fetched suggestion", suggestion);
+      console.log("suggestion_object_ids", suggestion_object_ids);
+      console.log("suggestion_object_ids length", suggestion_object_ids.length);
+      console.log("result_object_ids length", result_object_ids.length);
+      console.log(
+        "arraysEqualIgnoreOrder",
+        arraysEqualIgnoreOrder(suggestion_object_ids, result_object_ids)
+      );
+      console.groupEnd();
+
+      if (suggestion && arraysEqualIgnoreOrder(suggestion_object_ids, result_object_ids)) {
+
+        // console.log("suggestion found: ", suggestion, result_object_ids, hits);
+      } else {
+        // Send message to agent
+
+        console.log("updating suggestion", query, result_object_ids);
+
+        await UpdateSuggestion(query, result_object_ids);
+
+        // Fetch back the suggestion to verify the update landed.
+        const refreshedSuggestion = (await getObjectsByIds<Suggestion>(
+          [query],
+          "news_paper_generic_v2_query_suggestions"
+        ))[0];
+        const refreshedIds = refreshedSuggestion?.result_object_ids ?? [];
+        console.groupCollapsed("post-update suggestion fetch");
+        console.log("refreshed suggestion", refreshedSuggestion);
+        console.log("refreshed result_object_ids", refreshedIds);
+        console.log(
+          "arraysEqualIgnoreOrder (post-update)",
+          arraysEqualIgnoreOrder(refreshedIds, result_object_ids)
+        );
+        console.groupEnd();
+
+        const agentMessage = constructAgentMessage(text, hits);
+
+        sendMessage({ text: agentMessage });
+      }
 
     },
-    [results, sendMessage, setInputValue]
+    [constructAgentMessage, refineRootQuery, results, sendMessage]
   );
 
   const handleClear = useCallback(() => {
@@ -278,7 +366,6 @@ export const useAgentChat = (): UseAgentChatResult => {
     supported,
     listening,
     error,
-    handleKeyDown,
     handleSubmit,
     handleClear,
     handleMicToggle,

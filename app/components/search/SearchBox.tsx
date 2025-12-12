@@ -14,7 +14,6 @@ type SearchBoxProps = {
   | "inputValue"
   | "setInputValue"
   | "inputRef"
-  | "handleKeyDown"
   | "handleSubmit"
   | "handleClear"
   | "handleMicToggle"

@@ -1,18 +1,42 @@
 "use client";
-import { useHits } from "react-instantsearch";
+import { useHits, useInstantSearch } from "react-instantsearch";
 import { ArrowUpRight } from "lucide-react";
+import { SummaryWithSourcesInput } from "../agent/tools/SummaryWithSourcesTool";
 
-type Suggestion = {
+export type Suggestion = {
   objectID: string;
   query: string;
+  result_object_ids: string[];
+  tool_output: SummaryWithSourcesInput;
 };
 
-export function Suggestions({ setInputValue,inputValue,handleSubmit }: { setInputValue: (value: string) => void,inputValue: string,handleSubmit: (query: string) => void }) {
+export function Suggestions({
+  setInputValue,
+  inputValue,
+  handleSubmit,
+  refineMainQuery,
+}: {
+  setInputValue: (value: string) => void;
+  inputValue: string;
+  handleSubmit: (query: string) => void;
+  refineMainQuery: (query: string) => void;
+}) {
   const { results } = useHits<Suggestion>();
+  const { uiState } = useInstantSearch();
+
+  const handleClick = (query: string) => {
+    // Push the chosen suggestion into the root InstantSearch state before submitting.
+    console.log("uiState", uiState);
+    refineMainQuery(query);
+    setInputValue(query);
+    handleSubmit(query);
+  };
 
   if (results?.hits.length === 0 || ( results?.hits.length === 1 && results?.hits[0].query.toLowerCase() === inputValue.toLowerCase())) {
     return null;
   }
+
+
 
   return (
     <>
@@ -22,8 +46,7 @@ export function Suggestions({ setInputValue,inputValue,handleSubmit }: { setInpu
             key={hit.objectID}
             className="group relative inline-flex items-center gap-1.5 cursor-pointer"
             onClick={() => {
-              setInputValue(hit.query);
-              handleSubmit(hit.query);
+              handleClick(hit.query);
             }}
           >
             <span className="relative">

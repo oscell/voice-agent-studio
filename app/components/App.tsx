@@ -29,11 +29,10 @@ const App: () => JSX.Element = () => {
 export default App;
 
 const Page = () => {
-  const { query } = useSearchBox();
+  const { query, refine } = useSearchBox();
   const {
     messages,
     status,
-    sendMessage,
     listening,
     handleMicToggle,
     micDisabled,
@@ -41,7 +40,6 @@ const Page = () => {
     inputValue,
     setInputValue,
     inputRef,
-    handleKeyDown,
     handleClear,
     micVariant,
     errorMessage,
@@ -64,7 +62,6 @@ const Page = () => {
             setInputValue={setInputValue}
             handleSubmit={handleSubmit}
             inputRef={inputRef}
-            handleKeyDown={handleKeyDown}
             handleClear={handleClear}
             handleMicToggle={handleMicToggle}
             micDisabled={micDisabled}
@@ -121,6 +118,7 @@ const Page = () => {
                 setInputValue={setInputValue}
                 inputValue={inputValue}
                 handleSubmit={handleSubmit}
+                refineMainQuery={refine}
               />
             </Index>
             <AgentWidget messages={messages} status={status} />
