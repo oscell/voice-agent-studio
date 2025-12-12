@@ -3,15 +3,16 @@ import { algoliasearch } from "algoliasearch";
 import type { Suggestion } from "@/app/components/search/Suggestions";
 import type { SummaryWithSourcesInput } from "@/app/components/agent/tools/SummaryWithSourcesTool";
 
-const client = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
-  process.env.NEXT_PUBLIC_ALGOLIA_WRITE_API_KEY ?? ""
-);
+
 
 export async function getObjectsByIds<T extends Product | Article | Suggestion>(
   objectIDs: string[],
   indexName: string
 ): Promise<T[]> {
+  const client = algoliasearch(
+    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
+    process.env.NEXT_PUBLIC_ALGOLIA_WRITE_API_KEY ?? ""
+  );
   const res = await client.getObjects({
     requests: objectIDs.map((objectID) => ({
       indexName,
@@ -27,6 +28,10 @@ export async function UpdateSuggestion(
   result_object_ids?: string[],
   tool_output?: SummaryWithSourcesInput
 ) {
+  const client = algoliasearch(
+    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
+    process.env.NEXT_PUBLIC_ALGOLIA_WRITE_API_KEY ?? ""
+  );
   console.groupCollapsed("UpdateSuggestion");
   console.log(
     "Updating suggestion: ",

@@ -236,8 +236,8 @@ export const useAgentChat = (): UseAgentChatResult => {
 
   const constructAgentMessage = useCallback(
     (userQuery: string, topResults: Article[]) => {
-      const top10 = topResults.slice(0, 10);
-      const items = top10.map((hit) => `- ${hit.title}`).join("\n");
+      const top10 = topResults.slice(0, 1);
+      const items = top10.map((hit) => `- ${hit.title}, ${hit.objectID}, ${hit.article}`).join("\n");
       return `Query: ${userQuery}\nTop results:\n${items}`.trim();
     },
     []
@@ -277,8 +277,8 @@ export const useAgentChat = (): UseAgentChatResult => {
 
 
       // Normalize current hit IDs: dedupe, cap at 10, and keep stable order.
-      const result_object_ids = Array.from(new Set(hits.map((hit) => hit.objectID))).slice(0, 10);
-      const result_names = hits.slice(0, 10).map((hit) => hit.title);
+      const result_object_ids = Array.from(new Set(hits.map((hit) => hit.objectID))).slice(0, 1);
+      const result_names = hits.slice(0, 1).map((hit) => hit.title);
       console.log("result_names", result_names);
       console.log("result_object_ids", result_object_ids);
 
@@ -378,7 +378,7 @@ export const useAgentChat = (): UseAgentChatResult => {
       }
 
     },
-    [constructAgentMessage, refineRootQuery, results, sendMessage]
+    [constructAgentMessage, refineRootQuery, results, sendMessage, messages]
   );
 
   const handleClear = useCallback(() => {
