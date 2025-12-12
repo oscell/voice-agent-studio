@@ -17,6 +17,7 @@ import { DisplayItemsInput } from "../components/agent/tools/DisplayItemsTool";
 import { SummaryWithSourcesInput } from "../components/agent/tools/SummaryWithSourcesTool";
 import { Article } from "@/lib/types/Product";
 import { useSpeechSettings } from "../context/SpeechSettingsContext";
+import { useHits } from "react-instantsearch";
 
 export type UseAgentChatResult = {
   // Agent chat state
@@ -38,6 +39,7 @@ export type UseAgentChatResult = {
   handleKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   handleClear: () => void;
   handleMicToggle: () => void;
+  handleSubmit: (query: string) => void;
 
   // Mic button state
   micDisabled: boolean;
@@ -109,6 +111,8 @@ export const useAgentChat = (): UseAgentChatResult => {
       }
     },
   });
+
+  const { results } = useHits<Article>();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -221,6 +225,22 @@ export const useAgentChat = (): UseAgentChatResult => {
     [inputValue, sendMessage]
   );
 
+  const handleSubmit = useCallback(
+    (query: string) => {
+      const text = query.trim();
+      if (!text) return;
+
+      const hits = results?.hits ?? [];
+      // TODO: optionally enrich the message with hits if needed.
+      void hits;
+
+      sendMessage({ text });
+      setInputValue(text);
+
+    },
+    [results, sendMessage, setInputValue]
+  );
+
   const handleClear = useCallback(() => {
     resetInput();
     inputRef.current?.focus();
@@ -259,6 +279,7 @@ export const useAgentChat = (): UseAgentChatResult => {
     listening,
     error,
     handleKeyDown,
+    handleSubmit,
     handleClear,
     handleMicToggle,
     micDisabled,

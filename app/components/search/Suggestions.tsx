@@ -7,9 +7,8 @@ type Suggestion = {
   query: string;
 };
 
-export function Suggestions({ setInputValue,inputValue }: { setInputValue: (value: string) => void,inputValue: string }) {
+export function Suggestions({ setInputValue,inputValue,handleSubmit }: { setInputValue: (value: string) => void,inputValue: string,handleSubmit: (query: string) => void }) {
   const { results } = useHits<Suggestion>();
-
 
   if (results?.hits.length === 0 || ( results?.hits.length === 1 && results?.hits[0].query.toLowerCase() === inputValue.toLowerCase())) {
     return null;
@@ -22,7 +21,10 @@ export function Suggestions({ setInputValue,inputValue }: { setInputValue: (valu
           <div 
             key={hit.objectID}
             className="group relative inline-flex items-center gap-1.5 cursor-pointer"
-            onClick={() => setInputValue(hit.query)}
+            onClick={() => {
+              setInputValue(hit.query);
+              handleSubmit(hit.query);
+            }}
           >
             <span className="relative">
               {hit.query}

@@ -46,50 +46,10 @@ const Page = () => {
     micVariant,
     errorMessage,
     warningMessage,
+    handleSubmit,
   } = useAgentChat();
 
-  const [topHits, setTopHits] = useState<Article[]>([]);
-  const [lastSentSnapshot, setLastSentSnapshot] = useState("");
-
-  // Allow resending the same query after clearing the input.
-  useEffect(() => {
-    if (!inputValue.trim() && lastSentSnapshot) {
-      setLastSentSnapshot("");
-    }
-  }, [inputValue, lastSentSnapshot]);
-
   // Debounce sending search context to the agent until typing stops and the agent is idle.
-  useEffect(() => {
-    const trimmedQuery = inputValue.trim();
-    const topTenHits = topHits.slice(0, 10);
-
-    if (status !== "ready") return;
-    if (!trimmedQuery) return;
-    if (topTenHits.length === 0) return;
-
-    const snapshot = `${trimmedQuery}::${topTenHits
-      .map((hit) => hit.objectID)
-      .join(",")}`;
-    if (snapshot === lastSentSnapshot) return;
-
-    const timer = setTimeout(() => {
-      const formattedHits = topTenHits
-        .map(
-          (hit, index) =>
-            `${index + 1}. ${hit.title} by ${hit.author} (id: ${hit.objectID})`
-        )
-        .join("\n");
-
-      sendMessage({
-        text: `Search query: "${trimmedQuery}"\nTop results:\n${formattedHits}`,
-      });
-      setLastSentSnapshot(snapshot);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [inputValue, lastSentSnapshot, sendMessage, status, topHits]);
-
-  console.log(query);
   return (
     <div className="relative flex w-full h-full antialiased overflow-hidden bg-background text-foreground selection:bg-primary/10 selection:text-primary">
       {listening && (
@@ -102,6 +62,7 @@ const Page = () => {
           <SearchBox
             inputValue={inputValue}
             setInputValue={setInputValue}
+            handleSubmit={handleSubmit}
             inputRef={inputRef}
             handleKeyDown={handleKeyDown}
             handleClear={handleClear}
@@ -156,10 +117,14 @@ const Page = () => {
 
           <div className="flex-1 overflow-y-auto min-h-0 pr-2 scrollbar-hide">
             <Index indexName="news_paper_generic_v2_query_suggestions">
-              <Suggestions setInputValue={setInputValue} inputValue={inputValue}/>
+              <Suggestions
+                setInputValue={setInputValue}
+                inputValue={inputValue}
+                handleSubmit={handleSubmit}
+              />
             </Index>
             <AgentWidget messages={messages} status={status} />
-            <Hits onTopHitsChange={setTopHits} />
+            <Hits />
           </div>
         </div>
       </div>

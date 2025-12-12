@@ -15,6 +15,7 @@ type SearchBoxProps = {
   | "setInputValue"
   | "inputRef"
   | "handleKeyDown"
+  | "handleSubmit"
   | "handleClear"
   | "handleMicToggle"
   | "micDisabled"
@@ -33,7 +34,7 @@ export const SearchBox = ({
     inputValue,
     setInputValue,
     inputRef,
-    handleKeyDown,
+    handleSubmit,
     handleClear,
     handleMicToggle,
     micDisabled,
@@ -51,6 +52,15 @@ export const SearchBox = ({
     }
   }, [inputValue, query, refine]);
 
+  const handleKeyDownSubmit = (query: string) => {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(query);
+      }
+    };
+  };
+
   return (
     <div className="relative group z-50">
       <div className="flex flex-col gap-2 p-1.5 bg-background/80 backdrop-blur-xl border shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:border-primary/20 focus-within:shadow-lg focus-within:border-primary/30">
@@ -64,7 +74,7 @@ export const SearchBox = ({
               setInputValue(nextValue);
               refine(nextValue);
             }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={() => handleKeyDownSubmit(inputValue)}
             rows={1}
             className="min-h-[44px] max-h-[200px] py-2.5 px-0 border-none shadow-none focus-visible:ring-0 resize-none bg-transparent text-base placeholder:text-muted-foreground/50 leading-relaxed"
           />
@@ -86,14 +96,20 @@ export const SearchBox = ({
             {showMic && (
               <Button
                 type="button"
-                variant={micVariant === "destructive" ? "destructive" : micPressed ? "default" : "secondary"}
+                variant={
+                  micVariant === "destructive"
+                    ? "destructive"
+                    : micPressed
+                      ? "default"
+                      : "secondary"
+                }
                 size="icon"
                 onClick={handleMicToggle}
                 disabled={micDisabled}
                 aria-pressed={micPressed}
                 className={`h-9 w-9 rounded-xl transition-all duration-300 ${
-                  micPressed 
-                    ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20 shadow-lg scale-105" 
+                  micPressed
+                    ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20 shadow-lg scale-105"
                     : "hover:bg-primary/10 hover:text-primary"
                 }`}
               >
