@@ -39,9 +39,10 @@ export async function UpdateSuggestion(
   try {
     const indexName = "news_paper_generic_v2_query_suggestions";
 
+    console.log("Fetching existing suggestion", indexName, objectID);
     // Fetch existing record so we can merge fields instead of overwriting.
     const existing = await client
-      .getObject<Record<string, any>>({
+      .getObject({
         indexName,
         objectID,
       })
@@ -50,14 +51,23 @@ export async function UpdateSuggestion(
         return undefined;
       });
 
+    console.log("Existing suggestion", existing);
+    console.log(
+      "Existing result_object_ids",
+      existing && (existing as any).result_object_ids
+    );
+
+    const payload = {
+      ...(existing ?? {}),
+      objectID,
+      ...(result_object_ids ? { result_object_ids } : {}),
+      ...(tool_output ? { tool_output } : {}),
+    };
+    console.log("Saving suggestion payload", payload);
+
     const res = await client.saveObject({
       indexName,
-      body: {
-        ...(existing ?? {}),
-        objectID,
-        ...(result_object_ids ? { result_object_ids } : {}),
-        ...(tool_output ? { tool_output } : {}),
-      },
+      body: payload,
     });
     console.log("Algolia saveObject response", res);
     if (res.taskID) {

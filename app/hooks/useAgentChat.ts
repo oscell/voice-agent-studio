@@ -12,11 +12,12 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { getObjectsByIds, UpdateSuggestion } from "@/lib/getObjectByIDs";
 import config from "@/lib/constants";
-import { SummaryWithSourcesInput } from "../components/agent/tools/SummaryWithSourcesTool";
+import { SummaryWithSourcesInput,SummaryWithSourcesToolUIPart } from "../components/agent/tools/SummaryWithSourcesTool";
 import { Article } from "@/lib/types/Product";
 import { useSpeechSettings } from "../context/SpeechSettingsContext";
 import { useHits, useSearchBox } from "react-instantsearch";
 import type { Suggestion } from "@/app/components/search/Suggestions";
+import { UIMessage } from "@ai-sdk/react";
 export type UseAgentChatResult = {
   // Agent chat state
   messages: ReturnType<typeof useChat>["messages"];
@@ -121,6 +122,14 @@ export const useAgentChat = (): UseAgentChatResult => {
     const sortedA = [...a].sort();
     const sortedB = [...b].sort();
     return sortedA.every((val, idx) => val === sortedB[idx]);
+  };
+
+  const diffArrays = (a: string[] = [], b: string[] = []) => {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    const onlyInA = a.filter((id) => !setB.has(id));
+    const onlyInB = b.filter((id) => !setA.has(id));
+    return { onlyInA, onlyInB };
   };
 
   const { language, setLanguage } = useSpeechSettings();
@@ -260,6 +269,8 @@ export const useAgentChat = (): UseAgentChatResult => {
         return latestResultsRef.current;
       };
 
+      console.log("messages", messages);
+
       const freshResults = await waitForResults();
       const hits = (freshResults?.hits as Article[]) ?? results?.hits ?? [];
       const suggestion = (await getObjectsByIds<Suggestion>([query], "news_paper_generic_v2_query_suggestions"))[0];
@@ -293,18 +304,59 @@ export const useAgentChat = (): UseAgentChatResult => {
         "arraysEqualIgnoreOrder",
         arraysEqualIgnoreOrder(suggestion_object_ids, result_object_ids)
       );
+      const diffSuggestionVsResult = diffArrays(suggestion_object_ids, result_object_ids);
+      const diffResultVsSuggestion = diffArrays(result_object_ids, suggestion_object_ids);
+      console.log("array diff (suggestion vs result)", diffSuggestionVsResult);
+      console.log("array diff (result vs suggestion)", diffResultVsSuggestion);
+      console.log("lastResultObjectIdsRef", lastResultObjectIdsRef.current);
+      console.log(
+        "last vs current equal",
+        arraysEqualIgnoreOrder(lastResultObjectIdsRef.current ?? [], result_object_ids)
+      );
       console.groupEnd();
 
-      if (suggestion && arraysEqualIgnoreOrder(suggestion_object_ids, result_object_ids)) {
+      const arraysMatch = arraysEqualIgnoreOrder(suggestion_object_ids, result_object_ids);
+      const nearMatch =
+        suggestion &&
+        suggestion.tool_output &&
+        diffSuggestionVsResult.onlyInA.length <= 1 &&
+        diffSuggestionVsResult.onlyInB.length <= 1 &&
+        diffResultVsSuggestion.onlyInA.length <= 1 &&
+        diffResultVsSuggestion.onlyInB.length <= 1;
 
-        // console.log("suggestion found: ", suggestion, result_object_ids, hits);
+      if (suggestion && suggestion.tool_output && (arraysMatch || nearMatch)) {
+        if (!arraysMatch) {
+          // Keep Algolia in sync if we detected a near-match but with slight drift.
+          await UpdateSuggestion(query, result_object_ids, suggestion.tool_output);
+        }
+
+        messages.push({
+          role: "user",
+          id: "suggestion-found",
+          parts: [{ type: "text", text: "Suggestion found: " + suggestion.query }],
+        } as UIMessage);
+
+        const toolPart: SummaryWithSourcesToolUIPart = {
+          type: "tool-summary-with-sources",
+          toolName: "summary-with-sources",
+          toolCallId: "suggestion-found-agent",
+          state: "output-available",
+          input: suggestion.tool_output,
+          output: { response: hits },
+        };
+
+        messages.push({
+          role: "assistant",
+          id: "suggestion-found-agent",
+          type: "tool_call",
+          toolCallId: "suggestion-found-agent",
+          toolName: "summary-with-sources",
+          parts: [toolPart],
+        } as UIMessage<SummaryWithSourcesToolUIPart>);
+        console.log("messages", messages);
       } else {
         // Send message to agent
-
-        console.log("updating suggestion", query, result_object_ids);
-
         await UpdateSuggestion(query, result_object_ids);
-
         // Fetch back the suggestion to verify the update landed.
         const refreshedSuggestion = (await getObjectsByIds<Suggestion>(
           [query],
